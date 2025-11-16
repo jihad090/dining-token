@@ -13,7 +13,11 @@ export default function LoginScreen() {
     // TODO: call login API, validate credentials etc
     console.log('Logging in with', email, password);
     // On success: redirect / dismiss modal. Eg: router.push('/')
-    router.push('/(diner)/token-screen')
+    if(email==''){
+      router.push('/(diner)/token-screen')
+    }else if(email=="boy"){
+      router.push('/(dining-boy)/home')
+    }
   };
 
   return (

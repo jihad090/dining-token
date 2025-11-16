@@ -21,14 +21,16 @@ export default function TabLayout() {
         name="home"
         options={{
           title: 'Home',
+          headerShown:false,
           tabBarIcon: ({ color }) => <MaterialCommunityIcons name="home-account" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="pdf-screen"
+        name="scan-screen"
         options={{
-          title: 'PDF',
-          tabBarIcon: ({ color }) => <MaterialIcons name="picture-as-pdf" size={28} color={color} />,
+          title: 'Scan',
+          headerShown:false,
+          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="qrcode-scan" size={28} color="white" />,
         }}
       />
     </Tabs>

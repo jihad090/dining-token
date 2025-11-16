@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "rv",
-    "slug": "rv",
+    "name": "dining-token",
+    "slug": "dining-token",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "rv",
+    "scheme": "dining-token",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {

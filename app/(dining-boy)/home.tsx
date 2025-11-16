@@ -1,62 +1,70 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons'; 
-import { Alert } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { router } from 'expo-router';
+// import { router } from 'expo-router'; // Re-include if using Expo Router
 
+// Mock router push function for non-Expo environments
+const router = {
+  push: (route: string) => console.log(`Navigating to: ${route}`)
+};
+
+
+// --- Types & Constants ---
 interface MealStatus {
   totalMealsToday: number;
   mealsEaten: number;
   nextFeastAnnouncement: string | null;
-  personalWeeklyMealCount: number; 
 }
 
-interface TokenStatus {
-  lunchScanned: boolean;
-  dinnerScanned: boolean;
+interface ScanRecord {
+  id: string; // Token ID/QR Code Value
+  meal: 'Lunch' | 'Dinner';
+  date: string;
+  isSuccessful: boolean;
+  scanTime: string; // Time token was scanned/validated
 }
 
 const HALL_TIMINGS = {
-  LUNCH_START: 16, 
-  DINNER_START: 20, 
+  LUNCH_START: 16, // 4 PM
+  DINNER_START: 20, // 8 PM
 };
 
+// Mock data for scan history
+const mockScanHistory: ScanRecord[] = [
+  { id: '2104090-L-121212', meal: 'Lunch', date: '10 Nov 2025', isSuccessful: true, scanTime: '13:05' },
+  { id: '2104091-D-121213', meal: 'Dinner', date: '10 Nov 2025', isSuccessful: true, scanTime: '20:15' },
+  { id: '2104092-L-121214', meal: 'Lunch', date: '09 Nov 2025', isSuccessful: false, scanTime: '12:45' },
+];
 
-const fetchDinerData = async (): Promise<{ status: MealStatus; tokens: TokenStatus }> => {
+
+const fetchDiningBoyData = async (): Promise<{ status: MealStatus, history: ScanRecord[] }> => {
   await new Promise(resolve => setTimeout(resolve, 800));
   
   const total = 180;
-  const eaten = 155;
+  // Meals eaten is now derived from the mock history
+  const mealsEatenCount = mockScanHistory.filter(r => r.isSuccessful).length;
 
   return {
     status: {
       totalMealsToday: total,
-      mealsEaten: eaten,
+      mealsEaten: mealsEatenCount,
       nextFeastAnnouncement: 'Monthly special dinner on 20 Nov 2025!',
-      personalWeeklyMealCount: 17, 
     },
-    tokens: {
-      lunchScanned: true,
-      dinnerScanned: false,
-    },
+    history: mockScanHistory,
   };
 };
 
-export default function DinerDashboard() {
+export default function DiningBoyDashboard() {
   const [mealStatus, setMealStatus] = useState<MealStatus>({
     totalMealsToday: 0,
     mealsEaten: 0,
     nextFeastAnnouncement: null,
-    personalWeeklyMealCount: 0,
   });
-  const [tokenStatus, setTokenStatus] = useState<TokenStatus>({
-    lunchScanned: false,
-    dinnerScanned: false,
-  });
+  const [scanHistory, setScanHistory] = useState<ScanRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // --- Derived State and Logic ---
+  // --- Derived State and Logic (Hall Status) ---
   const tokensRemaining = mealStatus.totalMealsToday - mealStatus.mealsEaten;
   const tokenWarning = mealStatus.mealsEaten > mealStatus.totalMealsToday * 0.8;
   const now = new Date();
@@ -68,16 +76,13 @@ export default function DinerDashboard() {
   let nextMealName: 'Lunch' | 'Dinner';
 
   if (currentHour < HALL_TIMINGS.LUNCH_START) {
-    // Before Lunch
     nextMealTime = new Date(now.setHours(HALL_TIMINGS.LUNCH_START, 0, 0, 0));
     nextMealName = 'Lunch';
   } else if (currentHour < HALL_TIMINGS.DINNER_START) {
-    // Between Lunch and Dinner
     nextMealTime = new Date(now.setHours(HALL_TIMINGS.DINNER_START, 0, 0, 0));
     nextMealName = 'Dinner';
     currentMealName = 'Lunch';
   } else {
-    // After Dinner (Next meal is Lunch tomorrow)
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
     nextMealTime = new Date(tomorrow.setHours(HALL_TIMINGS.LUNCH_START, 0, 0, 0));
@@ -92,51 +97,27 @@ export default function DinerDashboard() {
 
   useEffect(() => {
     setLoading(true);
-    fetchDinerData().then(data => {
+    fetchDiningBoyData().then(data => {
       setMealStatus(data.status);
-      setTokenStatus(data.tokens);
+      setScanHistory(data.history);
       setLoading(false);
     });
   }, []);
 
-  const handleViewToken = (scanHistory:any) => {
-    if(scanHistory==true){
-      Alert.alert(
-        `Scanned successfully on time`,
-        `Token ID: 2104090-L-121212\nScanning Date: 10 Nov 2025  \nScanning Time: 01:00 pm`,
-        [
-          {
-            text: 'OK',
-            style: 'cancel',
-          },
-        ],
-        { cancelable: true }
-      );      
-    }else{
-      Alert.alert(
-        `Missed to scan `,
-        `Token ID: 2104090-L-121212 \nDuration was 12:00 pm - 02:00 pm \nDate: 10 Nov 2025`,
-        [
-          {
-            text: 'OK',
-            style: 'cancel',
-          },
-        ],
-        { cancelable: true }
-      );
-    }
-
-  };
-
-  const handleOrderToken = () => {
-    console.log('Navigating to Token Order screen...');
+  // Action: Display token details (QR code value and status)
+  const handleViewToken = (record: ScanRecord) => {
+    Alert.alert(
+      `${record.meal} Token Scan Details`,
+      `Token ID (QR Value): ${record.id}\nStatus: ${record.isSuccessful ? 'Successful' : 'Failed'}\nScan Time: ${record.scanTime }`,
+      [{ text: 'OK', style: 'cancel' }]
+    );
   };
 
   if (loading) {
     return (
       <View style={[styles.container, styles.loadingContainer]}>
         <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Loading dining info...</Text>
+        <Text style={styles.loadingText}>Loading hall management info...</Text>
       </View>
     );
   }
@@ -151,7 +132,7 @@ export default function DinerDashboard() {
   return (
     <View style={styles.container}>
       <Text style={styles.hallName}>Muktijoddha Hall</Text>
-      <Text style={styles.dashboardTitle}>Diner Dashboard</Text>
+      <Text style={styles.dashboardTitle}>Token Management Dashboard</Text>
       
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
@@ -166,13 +147,12 @@ export default function DinerDashboard() {
                     </Text>
                 </View>
                 <Text style={styles.currentMealText}>
-                    {/* {currentMealName !== 'None' ? `Current: ${currentMealName}` : ''} */}
-                    Lunch
+                    {currentMealName !== 'None' ? currentMealName : 'Closed'}
                 </Text>
             </View>
         </View>
 
-        {/* --- 2. Combined Status Card (Hall & Personal) --- */}
+        {/* --- 2. Combined Status Card (Hall Status Only) --- */}
         <View style={styles.statusCard}>
             <View style={styles.cardHeader}>
                 <Text style={styles.cardHeaderText}>
@@ -181,9 +161,9 @@ export default function DinerDashboard() {
             </View>
 
             <View style={styles.statsRow}>
-                <MealStat label="Total Meals" value={mealStatus.totalMealsToday} width={'50%'} />
-                <MealStat label="Eaten Tokens" value={mealStatus.mealsEaten} width={'50%'} highlight={true} />
-                {/* <MealStat label="Weekly Usage" value={mealStatus.personalWeeklyMealCount} width={'33%'} highlight={false} icon="calendar-outline" /> */}
+                <MealStat label="Total Tokens" value={mealStatus.totalMealsToday} width={'33%'} />
+                <MealStat label="Successfull Scan" value={mealStatus.totalMealsToday-10} width={'33%'} />
+                <MealStat label="Invalid Scan" value={mealStatus.mealsEaten} width={'33%'} highlight={true} />
             </View>
 
             {tokenWarning && (
@@ -207,86 +187,68 @@ export default function DinerDashboard() {
                 <Ionicons name="chevron-forward" size={20} color="#C026D3" />
             </TouchableOpacity>
         )}
-
-        <Text style={styles.sectionHeader}>Your token history</Text>
         
-        <ActionButton 
-          label="10 Nov 2025 (Lunch Token)"
-          subtext={tokenStatus.lunchScanned ? 'Status: Scanned on time' : 'Status: Missed'}
-          color={tokenStatus.lunchScanned ? "#15B392" : "#d40b0b"} // Blue for Lunch
-          onPress={() => handleViewToken(tokenStatus.lunchScanned)}
-          disabled={false}
-        />
-        <ActionButton 
-          label="10 Nov 2025 (Dinner Token)"
-          subtext={tokenStatus.dinnerScanned ? 'Status: Scanned on time' : 'Status: Missed'}
-          color={tokenStatus.dinnerScanned ? "#15B392" : "#d40b0b"} // Blue for Lunch
-          onPress={() => handleViewToken(tokenStatus.dinnerScanned)}
-          disabled={false}
-        />
-        <ActionButton 
-          label="9 Nov 2025 (Dinner Token)"
-          subtext={tokenStatus.dinnerScanned ? 'Status: Scanned on time' : 'Status: Missed'}
-          color={tokenStatus.dinnerScanned ? "#15B392" : "#d40b0b"} // Blue for Lunch
-          onPress={() => handleViewToken(tokenStatus.dinnerScanned)}
-          disabled={false}
-        /> 
+        {/* --- 4. Scan History List (Core Feature for Dining Boy) --- */}
+        <Text style={styles.sectionHeader}>Today's Recent Scans ({scanHistory.length})</Text>
+        
+        {scanHistory.map((record) => (
+            <ScanHistoryItem
+                key={record.id}
+                record={record}
+                onPress={handleViewToken}
+            />
+        ))}
+
+        {scanHistory.length === 0 && (
+            <Text style={styles.noHistoryText}>No tokens have been scanned today yet.</Text>
+        )}
+
       </ScrollView>
 
-      {/* --- 5. Floating Action Button (FAB) for Ordering --- */}
+      {/* --- Logout Button --- */}
       <TouchableOpacity 
-        onPress={()=>{router.push('/login')}} 
+        onPress={() => router.push('/login')} 
         style={styles.logout}
       >
         <AntDesign name="logout" size={24} color="black" />
-        {/* <Text style={styles.fabText}>Logout</Text> */}
-      </TouchableOpacity>
-      <TouchableOpacity 
-        onPress={handleOrderToken} 
-        style={styles.fab}
-      >
-        <Ionicons name="add-circle" size={30} color="#fff" />
-        <Text style={styles.fabText}>Order Next Token</Text>
       </TouchableOpacity>
 
     </View>
   );
 }
 
+// --- Helper Components ---
 
-const MealStat = ({ label, value, highlight = false, width = '50%', icon }: { label: string, value: number, highlight?: boolean, width?: string, icon?: string }) => (
+const MealStat = ({ label, value, highlight = false, width = '50%' }: { label: string, value: number, highlight?: boolean, width?: string }) => (
   <View style={[styles.statItem]}>
-    {icon && <Ionicons name={icon as any} size={20} color="#6B7280" />}
     <Text style={[styles.statValue, highlight && { color: '#EF4444' }]}>{value}</Text>
     <Text style={styles.statLabel}>{label}</Text>
   </View>
 );
 
-const ActionButton = ({ label, subtext, onPress, color, disabled }: { label: string, subtext: string, onPress: () => void, color: string, disabled: boolean }) => (
-  <TouchableOpacity 
-    onPress={onPress} 
-    style={[
-      styles.actionButton, 
-      { backgroundColor: color }, 
-      disabled && styles.disabledButton
-    ]}
-    disabled={disabled}
-  >
-    <View style={styles.actionButtonContent}>
-      <Ionicons 
-        name={disabled ? "checkmark-circle-outline" : "qr-code-outline"} 
-        size={24} 
-        color="#fff" 
-        style={styles.qrIcon} 
-      />
-      <View>
-        <Text style={styles.actionButtonText}>{label}</Text>
-        <Text style={styles.actionButtonSubtext}>{subtext}</Text>
-      </View>
-    </View>
-    {!disabled && <Ionicons name="chevron-forward" size={20} color="#fff" />}
-  </TouchableOpacity>
-);
+const ScanHistoryItem = ({ record, onPress }: { record: ScanRecord, onPress: (record: ScanRecord) => void }) => {
+    const color = record.isSuccessful ? "#10B981" : "#EF4444"; // Success (Green) / Failure (Red)
+    const iconName = record.isSuccessful ? "checkmark-circle-outline" : "close-circle-outline";
+    const statusText = record.isSuccessful 
+        ? `Successful at ${record.scanTime}` 
+        : 'Scan Failed/Token Invalid';
+
+    return (
+        <TouchableOpacity 
+            onPress={() => onPress(record)} 
+            style={[styles.historyItemButton, { borderLeftColor: color }]}
+        >
+            <View style={styles.historyItemContent}>
+                <Ionicons name={iconName as any} size={24} color={color} style={styles.historyIcon} />
+                <View>
+                    <Text style={[styles.historyItemLabel]}>{`${record.date} (${record.meal} Token)`}</Text>
+                    <Text style={[styles.historyItemSubtext, {color}]}>{statusText}</Text>
+                </View>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#6B7280" />
+        </TouchableOpacity>
+    );
+};
 
 
 // --- Stylesheet ---
@@ -297,7 +259,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   scrollContent: {
-    paddingBottom: 100, // Make room for the FAB
+    paddingBottom: 20, 
   },
   loadingContainer: {
     justifyContent: 'center',
@@ -440,73 +402,49 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#C026D3',
   },
-  // 4. Action Button Styles
-  actionButton: {
+  // 4. Scan History Item Styles
+  historyItemButton: {
+    backgroundColor: '#fff',
+    padding: 15,
     borderRadius: 12,
-    padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 10,
+    borderLeftWidth: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 1,
+    elevation: 1,
   },
-  actionButtonContent: {
+  historyItemContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  actionButtonText: {
-    color: '#fff',
-    fontSize: 17,
+  historyItemLabel: {
+    fontSize: 16,
     fontWeight: '600',
+    color: '#1F2937',
   },
-  actionButtonSubtext: {
-    color: '#fff',
+  historyItemSubtext: {
     fontSize: 12,
-    opacity: 0.9,
+    marginTop: 2,
   },
-  qrIcon: {
+  historyIcon: {
     marginRight: 15,
   },
-  disabledButton: {
-    backgroundColor: '#9CA3AF',
-    opacity: 0.8,
+  noHistoryText: {
+    textAlign: 'center',
+    marginTop: 20,
+    color: '#6B7280',
+    fontStyle: 'italic',
   },
-  // 5. FAB Styles
-  fab: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: '#F97316',
-    borderRadius: 30,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 8,
-  },
+  // Logout Styles
   logout: {
     position: 'absolute',
     top: 50,
     right: 20,
-    // backgroundColor: '#133386',
-    borderRadius: 30,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#f5f5f6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 8,
+    padding: 5,
   },
-  fabText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
-  }
 });
