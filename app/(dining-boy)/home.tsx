@@ -2,13 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons'; 
 import AntDesign from '@expo/vector-icons/AntDesign';
-// import { router } from 'expo-router'; // Re-include if using Expo Router
-
-// Mock router push function for non-Expo environments
-const router = {
-  push: (route: string) => console.log(`Navigating to: ${route}`)
-};
-
+import { router } from 'expo-router';
 
 // --- Types & Constants ---
 interface MealStatus {
@@ -18,16 +12,16 @@ interface MealStatus {
 }
 
 interface ScanRecord {
-  id: string; // Token ID/QR Code Value
+  id: string; 
   meal: 'Lunch' | 'Dinner';
   date: string;
   isSuccessful: boolean;
-  scanTime: string; // Time token was scanned/validated
+  scanTime: string; 
 }
 
 const HALL_TIMINGS = {
-  LUNCH_START: 16, // 4 PM
-  DINNER_START: 20, // 8 PM
+  LUNCH_START: 16, 
+  DINNER_START: 20, 
 };
 
 // Mock data for scan history
@@ -217,7 +211,6 @@ export default function DiningBoyDashboard() {
   );
 }
 
-// --- Helper Components ---
 
 const MealStat = ({ label, value, highlight = false, width = '50%' }: { label: string, value: number, highlight?: boolean, width?: string }) => (
   <View style={[styles.statItem]}>

@@ -10,13 +10,14 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    // TODO: call login API, validate credentials etc
     console.log('Logging in with', email, password);
-    // On success: redirect / dismiss modal. Eg: router.push('/')
+
     if(email==''){
       router.push('/(diner)/token-screen')
     }else if(email=="boy"){
       router.push('/(dining-boy)/home')
+    }else if(email=='manager'){
+      router.push('/(manager)/professional-dashboard')
     }
   };
 

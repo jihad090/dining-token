@@ -145,7 +145,7 @@ export default function DinerDashboard() {
   const formatCountdown = (h: number, m: number) => {
       if (h > 0) return `${h} hr ${m} min`;
       if (m > 0) return `${m} minutes`;
-      return 'Starting Now!';
+      return 'Starting Soon!';
   };
 
   return (
@@ -162,7 +162,7 @@ export default function DinerDashboard() {
                 <View style={styles.timelineTextContainer}>
                     <Text style={styles.timelineTitle}>Next Service: {nextMealName}</Text>
                     <Text style={styles.timelineSubtitle}>
-                        Starts in <Text style={{fontWeight: '700', color: '#6366F1'}}>{formatCountdown(hoursUntilNextMeal, minutesUntilNextMeal)}</Text>
+                        <Text style={{fontWeight: '700', color: '#6366F1'}}>{formatCountdown(hoursUntilNextMeal, minutesUntilNextMeal)}</Text>
                     </Text>
                 </View>
                 <Text style={styles.currentMealText}>
@@ -233,13 +233,11 @@ export default function DinerDashboard() {
         /> 
       </ScrollView>
 
-      {/* --- 5. Floating Action Button (FAB) for Ordering --- */}
       <TouchableOpacity 
         onPress={()=>{router.push('/login')}} 
         style={styles.logout}
       >
         <AntDesign name="logout" size={24} color="black" />
-        {/* <Text style={styles.fabText}>Logout</Text> */}
       </TouchableOpacity>
       <TouchableOpacity 
         onPress={handleOrderToken} 

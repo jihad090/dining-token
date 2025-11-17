@@ -1,176 +1,345 @@
-// Note: This file has been transformed into a simple QR Code Scanner Interface
-// for the Dining Boy role, removing the original PDF elements.
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { CameraView, useCameraPermissions } from "expo-camera";
 
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons'; 
-
-// Simulate random scan results for demonstration
-const mockScanApi = (): Promise<{ success: boolean, tokenValue: string, message: string }> => {
-  return new Promise(resolve => {
-    // Simulate network delay
+const mockScanApi = (
+  scannedToken: string
+): Promise<{ success: boolean; tokenValue: string; message: string }> => {
+  return new Promise((resolve) => {
     setTimeout(() => {
-      const isSuccessful = Math.random() > 0.3; // 70% chance of success
-      const token = `ID-${Math.floor(Math.random() * 900000) + 100000}`;
-      
+      const isSuccessful = Math.random() > 0.3;
+
       if (isSuccessful) {
         resolve({
           success: true,
-          tokenValue: token,
-          message: `Meal token validated for student ${token}. Enjoy your meal!`,
+          tokenValue: scannedToken,
+          message: `Meal token validated for student ${scannedToken}. Enjoy your meal!`,
         });
       } else {
         resolve({
           success: false,
-          tokenValue: token,
-          message: `Invalid or expired token (${token}). Please verify student details.`,
+          tokenValue: scannedToken,
+          message: `Invalid or expired token (${scannedToken}). Please verify student details.`,
         });
       }
-    }, 1500); // 1.5 seconds delay
+    }, 1000);
   });
 };
 
 export default function QrScannerScreen() {
-  const [isScanning, setIsScanning] = useState(false);
-  const [lastScanResult, setLastScanResult] = useState<{ status: 'success' | 'failure' | null, message: string }>({
+  const [permission, requestPermission] = useCameraPermissions();
+
+  const [isScanning, setIsScanning] = useState(false); // camera actively scanning
+  const [isProcessing, setIsProcessing] = useState(false); // waiting for API
+  const [lastScanResult, setLastScanResult] = useState<{
+    status: "success" | "failure" | null;
+    message: string;
+  }>({
     status: null,
-    message: 'Press the button below to start scanning.',
+    message: "Press the button below to start scanning.",
   });
 
-  const handleScan = async () => {
-    // In a real app, this function would open the camera/QR reader view.
-    // Here we simulate the process.
-    setIsScanning(true);
-    setLastScanResult({ status: null, message: 'Scanning in progress...' });
+  // Ask for permission if not decided yet
+  if (!permission) {
+    return (
+      <View style={[styles.container, styles.center]}>
+        <ActivityIndicator size="large" color="#4F46E5" />
+        <Text style={styles.loadingText}>Checking camera permission…</Text>
+      </View>
+    );
+  }
 
-    // Simulate the API call after a successful scan
-    const result = await mockScanApi();
+  // If permission not granted, show a simple request UI
+  if (!permission.granted) {
+    return (
+      <View style={[styles.container, styles.center]}>
+        <Text style={styles.hallName}>Muktijoddha Hall</Text>
+        <Text style={[styles.subtitle, { marginBottom: 20 }]}>
+          Dining Token QR Scanner
+        </Text>
+        <Text style={styles.permissionText}>
+          Camera permission is required to scan dining tokens.
+        </Text>
+        <TouchableOpacity
+          style={[styles.scanButton, { marginTop: 24 }]}
+          onPress={requestPermission}
+        >
+          <Ionicons name="camera-outline" size={26} color="#fff" />
+          <Text style={styles.scanButtonText}>Allow Camera</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const handleStartScan = () => {
+    setIsScanning(true);
+    setLastScanResult({
+      status: null,
+      message: "Point the camera at the diner's QR token.",
+    });
+  };
+
+  // Called when expo-camera detects a QR / barcode
+  const handleBarcodeScanned = async ({
+    data,
+  }: {
+    data: string;
+    type: string;
+  }) => {
+    if (!isScanning || isProcessing) return; // ignore duplicates
 
     setIsScanning(false);
-    
-    if (result.success) {
-      setLastScanResult({ 
-        status: 'success', 
-        message: `SUCCESS! Token ${result.tokenValue} validated.`,
+    setIsProcessing(true);
+    setLastScanResult({
+      status: null,
+      message: "Validating token…",
+    });
+
+    try {
+      const result = await mockScanApi(data);
+
+      if (result.success) {
+        setLastScanResult({
+          status: "success",
+          message: `SUCCESS! Token ${result.tokenValue} validated.`,
+        });
+        Alert.alert("Scan Successful", result.message, [{ text: "OK" }]);
+      } else {
+        setLastScanResult({
+          status: "failure",
+          message: `FAILURE! Token ${result.tokenValue} invalid.`,
+        });
+        Alert.alert("Scan Failed", result.message, [{ text: "OK" }]);
+      }
+    } catch (e) {
+      setLastScanResult({
+        status: "failure",
+        message: "Something went wrong while validating token.",
       });
-      Alert.alert('Scan Successful', result.message, [{ text: 'OK' }]);
-    } else {
-      setLastScanResult({ 
-        status: 'failure', 
-        message: `FAILURE! Token ${result.tokenValue} invalid.`,
-      });
-      Alert.alert('Scan Failed', result.message, [{ text: 'OK' }]);
+      Alert.alert("Error", "Could not validate token. Please retry.", [
+        { text: "OK" },
+      ]);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   // Determine styles based on the last scan result status
-  const feedbackColor = lastScanResult.status === 'success' ? '#10B981' : 
-                        lastScanResult.status === 'failure' ? '#EF4444' : 
-                        '#6B7280';
-  
-  const feedbackBackgroundColor = lastScanResult.status === 'success' ? '#D1FAE5' : 
-                                  lastScanResult.status === 'failure' ? '#FEE2E2' : 
-                                  '#E5E7EB';
+  const feedbackColor =
+    lastScanResult.status === "success"
+      ? "#10B981"
+      : lastScanResult.status === "failure"
+      ? "#EF4444"
+      : "#6B7280";
+
+  const feedbackBackgroundColor =
+    lastScanResult.status === "success"
+      ? "#D1FAE5"
+      : lastScanResult.status === "failure"
+      ? "#FEE2E2"
+      : "#E5E7EB";
 
   return (
     <View style={styles.container}>
-      <Text style={styles.hallName}>Muktijoddha Hall</Text>
-      <Text style={styles.subtitle}>Dining Token QR Scanner</Text>
-
       <View style={styles.scannerArea}>
-        {/* Visual Feedback Display */}
-        <View style={[styles.feedbackBox, { backgroundColor: feedbackBackgroundColor }]}>
-            <Ionicons 
-                name={lastScanResult.status === 'success' ? "checkmark-circle" : 
-                      lastScanResult.status === 'failure' ? "close-circle" : 
-                      "scan-outline"} 
-                size={80} 
-                color={feedbackColor} 
+        <View style={styles.cameraWrapper}>
+          <CameraView
+            style={styles.camera}
+            facing="back"
+            // Only scan QR and barcodes
+            barcodeScannerSettings={{
+              barcodeTypes: ["qr", "ean13", "code128"],
+            }}
+            // Important: only attach handler if scanning is ON
+            onBarcodeScanned={
+              isScanning ? (event) => handleBarcodeScanned(event) : undefined
+            }
+          >
+            {/* Optional overlay */}
+            <View style={styles.cameraOverlay}>
+              <View style={styles.scanFrame} />
+              <Text style={styles.overlayText}>
+                {isScanning
+                  ? "Align the QR code within the frame"
+                  : "Press 'Start Scan' to begin"}
+              </Text>
+            </View>
+          </CameraView>
+        </View>
+
+        {/* Visual Feedback Box */}
+        <View
+          style={[
+            styles.feedbackBox,
+            { backgroundColor: feedbackBackgroundColor },
+          ]}
+        >
+          <Ionicons
+            name={
+              lastScanResult.status === "success"
+                ? "checkmark-circle"
+                : lastScanResult.status === "failure"
+                ? "close-circle"
+                : "scan-outline"
+            }
+            size={60}
+            color={feedbackColor}
+          />
+          <Text
+            style={[
+              styles.feedbackText,
+              { color: feedbackColor, marginTop: 12 },
+            ]}
+          >
+            {lastScanResult.message}
+          </Text>
+          {(isScanning || isProcessing) && (
+            <ActivityIndicator
+              size="large"
+              color="#4F46E5"
+              style={{ marginTop: 10 }}
             />
-            <Text style={[styles.feedbackText, { color: feedbackColor, marginTop: 15 }]}>
-                {lastScanResult.message}
-            </Text>
-            {isScanning && <ActivityIndicator size="large" color="#4F46E5" style={{marginTop: 10}} />}
+          )}
         </View>
       </View>
 
       {/* Primary Action Button */}
-      <TouchableOpacity 
-        style={styles.scanButton} 
-        onPress={handleScan}
-        disabled={isScanning}
+      <TouchableOpacity
+        style={[
+          styles.scanButton,
+          (isScanning || isProcessing) && { opacity: 0.7 },
+        ]}
+        onPress={handleStartScan}
+        disabled={isScanning || isProcessing}
       >
-        <Ionicons name="qr-code-outline" size={30} color="#fff" />
+        <Ionicons name="qr-code-outline" size={26} color="#fff" />
         <Text style={styles.scanButtonText}>
-          {isScanning ? 'Scanning...' : 'Start Scan'}
+          {isScanning || isProcessing ? "Scanning..." : "Start Scan"}
         </Text>
       </TouchableOpacity>
     </View>
   );
 }
 
+// ---- Styles ----
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#F3F4F6',
-    justifyContent: 'space-between', // Push scan button to the bottom
+    backgroundColor: "#F3F4F6",
+    justifyContent: "space-between",
     paddingTop: 50,
   },
+  center: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#6B7280",
+  },
   hallName: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1F2937',
+    fontWeight: "bold",
+    color: "#1F2937",
   },
   subtitle: {
-    textAlign: 'center',
-    marginBottom: 40,
+    textAlign: "center",
+    marginBottom: 20,
     fontSize: 18,
-    color: '#6B7280',
-    fontWeight: '500',
+    color: "#6B7280",
+    fontWeight: "500",
+  },
+  permissionText: {
+    textAlign: "center",
+    fontSize: 14,
+    color: "#4B5563",
+    paddingHorizontal: 24,
   },
   scannerArea: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    top:50,
+    paddingBottom: 20,
+  },
+  cameraWrapper: {
+    width: "100%",
+    aspectRatio: 3 / 4,
+    borderRadius: 20,
+    overflow: "hidden",
+    backgroundColor: "#000",
+    marginBottom: 16,
+  },
+  camera: {
+    flex: 1,
+  },
+  cameraOverlay: {
+    flex: 1,
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 24,
+    backgroundColor: "rgba(0,0,0,0.2)",
+  },
+  scanFrame: {
+    width: "70%",
+    height: "55%",
+    borderWidth: 3,
+    borderColor: "#ffffff",
+    borderRadius: 16,
+    backgroundColor: "transparent",
+  },
+  overlayText: {
+    color: "#E5E7EB",
+    fontSize: 13,
+    textAlign: "center",
+    paddingHorizontal: 16,
   },
   feedbackBox: {
-    width: '90%',
-    minHeight: 250,
+    width: "100%",
+    minHeight: 140,
     borderRadius: 20,
-    padding: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 5,
-    shadowColor: '#000',
+    padding: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 3,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: "#D1D5DB",
   },
   feedbackText: {
-    fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
   },
   scanButton: {
     height: 60,
-    backgroundColor: '#4F46E5', // Indigo color for primary action
+    backgroundColor: "#4F46E5",
     borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginHorizontal: 10,
     marginBottom: 20,
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 10,
     elevation: 8,
   },
   scanButtonText: {
-    color: '#fff',
-    fontSize: 22,
-    fontWeight: '700',
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "700",
   },
 });
