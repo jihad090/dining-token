@@ -191,14 +191,14 @@ const AssignmentSection = () => {
             <View style={styles.assignmentCard}>
                 <TextInput
                     style={styles.input}
-                    placeholder="Dining Boy Full Name (e.g., John Doe)"
+                    placeholder="Dining Boy Full Name (e.g., Kuddus Alom)"
                     value={newBoyName}
                     onChangeText={setNewBoyName}
                     keyboardType="default"
                 />
                 <TextInput
                     style={styles.input}
-                    placeholder="Dining Boy Email (e.g., boy@hall.edu)"
+                    placeholder="Dining Boy Email (e.g., boy@gmail.com)"
                     value={newBoyEmail}
                     onChangeText={setNewBoyEmail}
                     keyboardType="email-address"

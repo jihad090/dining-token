@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, Text, ScrollView, TextInput, Alert } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-// Assuming ThemedView/Text are simple wrappers for light/dark mode
 
-// --- Types & Dummy Data (Move these to a separate data file in a real app) ---
 interface Token {
   id: number;
   hallName: string;
@@ -39,10 +37,7 @@ const tokensForSale: SellerToken[] = [
   { id: 213, hallName: 'North Hall', date: '2025-11-18', mealType: 'Dinner', sellerName: 'MD. Mehedi', sellerEmail: '2104067@student.cuet.ac.bd', note: 'Urgent sale, contact soon!', isRequested: false },
   { id: 217, hallName: 'Muktijoddha Hall', date: '2025-11-18', mealType: 'Dinner', sellerName: 'Abu Shaid', sellerEmail: '2104070@student.cuet.ac.bd', note: 'Urgent sale, contact soon!', isRequested: false },
 ];
-// --- End Types & Dummy Data ---
 
-
-// Placeholder components for theming - replace with your actual Themed components
 const ThemedView = (props: any) => <View style={[{ backgroundColor: '#F3F4F6' }, props.style]}>{props.children}</View>;
 const ThemedText = (props: any) => <Text style={[{ color: 'black', fontSize: props.type === 'title' ? 24 : 16 }, props.style]}>{props.children}</Text>;
 
@@ -54,11 +49,9 @@ export default function ShareToken() {
   const [buySearchDate, setBuySearchDate] = useState('');
   const [buySearchMeal, setBuySearchMeal] = useState<'All' | 'Lunch' | 'Dinner'>('All');
   
-  // State for Buy Token Modal/Details View
   const [viewingSellerToken, setViewingSellerToken] = useState<SellerToken | null>(null);
 
 
-  // --- Buy Token Logic ---
   const handleRequestToken = (token: SellerToken) => {
     Alert.alert(
       "Confirm Request",
@@ -66,9 +59,7 @@ export default function ShareToken() {
       [
         { text: "Cancel", style: "cancel" },
         { text: "Confirm", onPress: () => {
-             // 1. Send request to the server (WebSocket/API)
              console.log(`Request sent for token ID: ${token.id}`);
-             // 2. Clear the detail view
              setViewingSellerToken(null);
              Alert.alert("Request Sent!", `Your request has been sent to ${token.sellerName}. You will be notified of their response.`);
         }}
@@ -114,7 +105,6 @@ export default function ShareToken() {
         );
     }
     
-    // List View
     return (
       <>
         {/* Search/Filter Bar */}
@@ -159,8 +149,6 @@ export default function ShareToken() {
     );
   };
   
-
-  // --- Sell Token Logic ---
   const handlePostTokenForSale = () => {
     if (!selectedSellTokenId) {
         Alert.alert("Error", "Please select a token to post for sale.");
@@ -174,9 +162,7 @@ export default function ShareToken() {
       [
         { text: "Cancel", style: "cancel" },
         { text: "Confirm", onPress: () => {
-             // 1. API call to post token (sending token ID and sellNote)
              console.log(`Token ID ${selectedSellTokenId} posted with note: ${sellNote}`);
-             // 2. Reset the form
              setSelectedSellTokenId(null);
              setSellNote('');
              Alert.alert("Success", "Your token is now visible in the Buy Token section!");
@@ -191,7 +177,6 @@ export default function ShareToken() {
     return (
       <ScrollView style={styles.listScrollView}>
         
-        {/* Tokens Awaiting Response/Requests */}
         <Text style={styles.sectionHeader}>Requests for Your Posted Tokens ({tokensAwaitingResponse.length})</Text>
         {tokensAwaitingResponse.length > 0 ? (
             tokensAwaitingResponse.map(token => (
@@ -212,7 +197,6 @@ export default function ShareToken() {
             <Text style={styles.emptyListText}>No pending requests for your tokens.</Text>
         )}
         
-        {/* Token Selection for Posting */}
         <Text style={styles.sectionHeader}>Select Your Available Token to Post</Text>
         {availableTokens.filter(t => t.isAvailable).map(token => (
           <TouchableOpacity 
@@ -234,7 +218,6 @@ export default function ShareToken() {
           </TouchableOpacity>
         ))}
 
-        {/* Short Note and Confirm */}
         <Text style={[styles.sectionHeader, {marginTop: 20}]}>Add Short Note (Optional)</Text>
         <TextInput
             style={styles.noteInput}
@@ -289,7 +272,6 @@ export default function ShareToken() {
   );
 }
 
-// --- Helper Components for Buy/Sell Section ---
 
 const DetailRow = ({ label, value, highlight = false }: { label: string, value: string, highlight?: boolean }) => (
     <View style={styles.detailRow}>
@@ -312,8 +294,6 @@ const MealTypeSelector = ({ value, onChange }: { value: 'All' | 'Lunch' | 'Dinne
     </View>
 );
 
-
-// --- Stylesheet ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,

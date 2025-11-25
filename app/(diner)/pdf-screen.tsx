@@ -10,7 +10,7 @@ export default function PdfScreen() {
       <ThemedText type="subtitle" style={styles.subtitle}>All Token PDF</ThemedText>
 
       <View style={styles.pdfContainer}>
-        {/* Placeholder for PDF preview image */}
+
         <Image
           source={require('../../assets/images/tokenListImage.png')}
           style={styles.pdfPreview}

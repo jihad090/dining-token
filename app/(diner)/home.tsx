@@ -62,22 +62,22 @@ export default function DinerDashboard() {
   const now = new Date();
   const currentHour = now.getHours();
 
-  // Determine the current or upcoming meal service
+
   let nextMealTime: Date;
   let currentMealName: 'Lunch' | 'Dinner' | 'None' = 'None';
   let nextMealName: 'Lunch' | 'Dinner';
 
   if (currentHour < HALL_TIMINGS.LUNCH_START) {
-    // Before Lunch
+
     nextMealTime = new Date(now.setHours(HALL_TIMINGS.LUNCH_START, 0, 0, 0));
     nextMealName = 'Lunch';
   } else if (currentHour < HALL_TIMINGS.DINNER_START) {
-    // Between Lunch and Dinner
+
     nextMealTime = new Date(now.setHours(HALL_TIMINGS.DINNER_START, 0, 0, 0));
     nextMealName = 'Dinner';
     currentMealName = 'Lunch';
   } else {
-    // After Dinner (Next meal is Lunch tomorrow)
+
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
     nextMealTime = new Date(tomorrow.setHours(HALL_TIMINGS.LUNCH_START, 0, 0, 0));
@@ -88,7 +88,6 @@ export default function DinerDashboard() {
   const timeDifferenceMs = nextMealTime.getTime() - now.getTime();
   const hoursUntilNextMeal = Math.floor(timeDifferenceMs / (1000 * 60 * 60));
   const minutesUntilNextMeal = Math.ceil((timeDifferenceMs % (1000 * 60 * 60)) / (1000 * 60));
-  // --- End Derived State and Logic ---
 
   useEffect(() => {
     setLoading(true);
@@ -141,7 +140,7 @@ export default function DinerDashboard() {
     );
   }
 
-  // Helper function to format the countdown text
+
   const formatCountdown = (h: number, m: number) => {
       if (h > 0) return `${h} hr ${m} min`;
       if (m > 0) return `${m} minutes`;
@@ -155,7 +154,7 @@ export default function DinerDashboard() {
       
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
-        {/* --- 1. Meal Service Timeline Card --- */}
+
         <View style={styles.timelineCard}>
             <View style={styles.timelineRow}>
                 <Ionicons name="timer-outline" size={24} color="#6366F1" />
@@ -166,13 +165,13 @@ export default function DinerDashboard() {
                     </Text>
                 </View>
                 <Text style={styles.currentMealText}>
-                    {/* {currentMealName !== 'None' ? `Current: ${currentMealName}` : ''} */}
+
                     Lunch
                 </Text>
             </View>
         </View>
 
-        {/* --- 2. Combined Status Card (Hall & Personal) --- */}
+
         <View style={styles.statusCard}>
             <View style={styles.cardHeader}>
                 <Text style={styles.cardHeaderText}>
@@ -183,7 +182,7 @@ export default function DinerDashboard() {
             <View style={styles.statsRow}>
                 <MealStat label="Total Meals" value={mealStatus.totalMealsToday} width={'50%'} />
                 <MealStat label="Eaten Tokens" value={mealStatus.mealsEaten} width={'50%'} highlight={true} />
-                {/* <MealStat label="Weekly Usage" value={mealStatus.personalWeeklyMealCount} width={'33%'} highlight={false} icon="calendar-outline" /> */}
+
             </View>
 
             {tokenWarning && (
@@ -195,7 +194,6 @@ export default function DinerDashboard() {
             )}
         </View>
 
-        {/* --- 3. Feast Announcement --- */}
         {mealStatus.nextFeastAnnouncement && (
             <TouchableOpacity style={styles.announcementCard}>
                 <View style={styles.announcementContent}>
@@ -287,7 +285,7 @@ const ActionButton = ({ label, subtext, onPress, color, disabled }: { label: str
 );
 
 
-// --- Stylesheet ---
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

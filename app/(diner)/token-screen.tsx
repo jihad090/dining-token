@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f7f8fa', // or your theme background
+    backgroundColor: '#f7f8fa', 
   },
   hallName: {
     textAlign: 'center',

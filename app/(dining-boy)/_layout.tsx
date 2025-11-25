@@ -30,7 +30,7 @@ export default function TabLayout() {
         options={{
           title: 'Scan',
           headerShown:false,
-          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="qrcode-scan" size={28} color="white" />,
+          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="qrcode-scan" size={28} color={color} />,
         }}
       />
     </Tabs>

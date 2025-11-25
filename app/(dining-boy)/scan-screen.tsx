@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -47,7 +47,14 @@ export default function QrScannerScreen() {
     message: "Press the button below to start scanning.",
   });
 
-  // Ask for permission if not decided yet
+  const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
+    };
+  }, []);
+
   if (!permission) {
     return (
       <View style={[styles.container, styles.center]}>
@@ -57,7 +64,6 @@ export default function QrScannerScreen() {
     );
   }
 
-  // If permission not granted, show a simple request UI
   if (!permission.granted) {
     return (
       <View style={[styles.container, styles.center]}>
@@ -80,24 +86,47 @@ export default function QrScannerScreen() {
   }
 
   const handleStartScan = () => {
+    // clear any existing timeout
+    if (scanTimeoutRef.current) {
+      clearTimeout(scanTimeoutRef.current);
+    }
+
     setIsScanning(true);
+    setIsProcessing(false);
     setLastScanResult({
       status: null,
       message: "Point the camera at the diner's QR token.",
     });
+
+    scanTimeoutRef.current = setTimeout(() => {
+      setIsScanning(false);
+      setLastScanResult((prev) => {
+        if (prev.status) return prev;
+        return {
+          status: "failure",
+          message: "Scan timed out. Please try again.",
+        };
+      });
+    }, 10000);
   };
 
-  // Called when expo-camera detects a QR / barcode
   const handleBarcodeScanned = async ({
     data,
   }: {
     data: string;
     type: string;
   }) => {
-    if (!isScanning || isProcessing) return; // ignore duplicates
+    if (!isScanning || isProcessing) return; 
 
     setIsScanning(false);
     setIsProcessing(true);
+
+
+    if (scanTimeoutRef.current) {
+      clearTimeout(scanTimeoutRef.current);
+      scanTimeoutRef.current = null;
+    }
+
     setLastScanResult({
       status: null,
       message: "Validating token…",
@@ -132,7 +161,6 @@ export default function QrScannerScreen() {
     }
   };
 
-  // Determine styles based on the last scan result status
   const feedbackColor =
     lastScanResult.status === "success"
       ? "#10B981"
@@ -149,23 +177,26 @@ export default function QrScannerScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Header */}
+      <View>
+        <Text style={styles.hallName}>Muktijoddha Hall</Text>
+        {/* <Text style={styles.subtitle}>Dining Token QR Scanner</Text> */}
+      </View>
+
       <View style={styles.scannerArea}>
         <View style={styles.cameraWrapper}>
           <CameraView
             style={styles.camera}
             facing="back"
-            // Only scan QR and barcodes
             barcodeScannerSettings={{
               barcodeTypes: ["qr", "ean13", "code128"],
             }}
-            // Important: only attach handler if scanning is ON
             onBarcodeScanned={
               isScanning ? (event) => handleBarcodeScanned(event) : undefined
             }
           >
-            {/* Optional overlay */}
             <View style={styles.cameraOverlay}>
-              <View style={styles.scanFrame} />
+              <View className="scanFrame" style={styles.scanFrame} />
               <Text style={styles.overlayText}>
                 {isScanning
                   ? "Align the QR code within the frame"
@@ -190,13 +221,13 @@ export default function QrScannerScreen() {
                 ? "close-circle"
                 : "scan-outline"
             }
-            size={60}
+            size={35}
             color={feedbackColor}
           />
           <Text
             style={[
               styles.feedbackText,
-              { color: feedbackColor, marginTop: 12 },
+              { color: feedbackColor},
             ]}
           >
             {lastScanResult.message}
@@ -250,12 +281,13 @@ const styles = StyleSheet.create({
   hallName: {
     textAlign: "center",
     fontSize: 28,
+    paddingBottom:30,
     fontWeight: "bold",
     color: "#1F2937",
   },
   subtitle: {
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 10,
     fontSize: 18,
     color: "#6B7280",
     fontWeight: "500",
@@ -270,7 +302,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    top:50,
     paddingBottom: 20,
   },
   cameraWrapper: {
@@ -307,9 +338,11 @@ const styles = StyleSheet.create({
   },
   feedbackBox: {
     width: "100%",
-    minHeight: 140,
+    minHeight: 40,
+    flexDirection: "row",
+    height: 50,
     borderRadius: 20,
-    padding: 16,
+    padding: 6,
     alignItems: "center",
     justifyContent: "center",
     elevation: 3,
@@ -324,6 +357,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     textAlign: "center",
+    flex: 1,
+    alignItems: "center",
   },
   scanButton: {
     height: 60,
@@ -334,12 +369,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     marginBottom: 20,
     flexDirection: "row",
-    gap: 10,
-    elevation: 8,
+    // removed 'gap' for better RN compatibility
   },
   scanButtonText: {
     color: "#fff",
     fontSize: 20,
     fontWeight: "700",
+    marginLeft: 8,
   },
 });

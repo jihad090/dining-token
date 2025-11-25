@@ -4,7 +4,6 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { router } from 'expo-router';
 
-// --- Types & Constants ---
 interface MealStatus {
   totalMealsToday: number;
   mealsEaten: number;
@@ -24,7 +23,6 @@ const HALL_TIMINGS = {
   DINNER_START: 20, 
 };
 
-// Mock data for scan history
 const mockScanHistory: ScanRecord[] = [
   { id: '2104090-L-121212', meal: 'Lunch', date: '10 Nov 2025', isSuccessful: true, scanTime: '13:05' },
   { id: '2104091-D-121213', meal: 'Dinner', date: '10 Nov 2025', isSuccessful: true, scanTime: '20:15' },
@@ -36,7 +34,6 @@ const fetchDiningBoyData = async (): Promise<{ status: MealStatus, history: Scan
   await new Promise(resolve => setTimeout(resolve, 800));
   
   const total = 180;
-  // Meals eaten is now derived from the mock history
   const mealsEatenCount = mockScanHistory.filter(r => r.isSuccessful).length;
 
   return {
@@ -58,13 +55,11 @@ export default function DiningBoyDashboard() {
   const [scanHistory, setScanHistory] = useState<ScanRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // --- Derived State and Logic (Hall Status) ---
   const tokensRemaining = mealStatus.totalMealsToday - mealStatus.mealsEaten;
   const tokenWarning = mealStatus.mealsEaten > mealStatus.totalMealsToday * 0.8;
   const now = new Date();
   const currentHour = now.getHours();
 
-  // Determine the current or upcoming meal service
   let nextMealTime: Date;
   let currentMealName: 'Lunch' | 'Dinner' | 'None' = 'None';
   let nextMealName: 'Lunch' | 'Dinner';
@@ -87,7 +82,6 @@ export default function DiningBoyDashboard() {
   const timeDifferenceMs = nextMealTime.getTime() - now.getTime();
   const hoursUntilNextMeal = Math.floor(timeDifferenceMs / (1000 * 60 * 60));
   const minutesUntilNextMeal = Math.ceil((timeDifferenceMs % (1000 * 60 * 60)) / (1000 * 60));
-  // --- End Derived State and Logic ---
 
   useEffect(() => {
     setLoading(true);
@@ -98,7 +92,6 @@ export default function DiningBoyDashboard() {
     });
   }, []);
 
-  // Action: Display token details (QR code value and status)
   const handleViewToken = (record: ScanRecord) => {
     Alert.alert(
       `${record.meal} Token Scan Details`,
@@ -116,7 +109,7 @@ export default function DiningBoyDashboard() {
     );
   }
 
-  // Helper function to format the countdown text
+
   const formatCountdown = (h: number, m: number) => {
       if (h > 0) return `${h} hr ${m} min`;
       if (m > 0) return `${m} minutes`;
@@ -126,11 +119,10 @@ export default function DiningBoyDashboard() {
   return (
     <View style={styles.container}>
       <Text style={styles.hallName}>Muktijoddha Hall</Text>
-      <Text style={styles.dashboardTitle}>Token Management Dashboard</Text>
+      <Text style={styles.dashboardTitle}>Dining Boy Dashboard</Text>
       
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
-        {/* --- 1. Meal Service Timeline Card --- */}
         <View style={styles.timelineCard}>
             <View style={styles.timelineRow}>
                 <Ionicons name="timer-outline" size={24} color="#6366F1" />
@@ -146,7 +138,6 @@ export default function DiningBoyDashboard() {
             </View>
         </View>
 
-        {/* --- 2. Combined Status Card (Hall Status Only) --- */}
         <View style={styles.statusCard}>
             <View style={styles.cardHeader}>
                 <Text style={styles.cardHeaderText}>
@@ -169,7 +160,6 @@ export default function DiningBoyDashboard() {
             )}
         </View>
 
-        {/* --- 3. Feast Announcement --- */}
         {mealStatus.nextFeastAnnouncement && (
             <TouchableOpacity style={styles.announcementCard}>
                 <View style={styles.announcementContent}>
@@ -182,7 +172,6 @@ export default function DiningBoyDashboard() {
             </TouchableOpacity>
         )}
         
-        {/* --- 4. Scan History List (Core Feature for Dining Boy) --- */}
         <Text style={styles.sectionHeader}>Today's Recent Scans ({scanHistory.length})</Text>
         
         {scanHistory.map((record) => (
@@ -199,7 +188,6 @@ export default function DiningBoyDashboard() {
 
       </ScrollView>
 
-      {/* --- Logout Button --- */}
       <TouchableOpacity 
         onPress={() => router.push('/login')} 
         style={styles.logout}
@@ -220,7 +208,7 @@ const MealStat = ({ label, value, highlight = false, width = '50%' }: { label: s
 );
 
 const ScanHistoryItem = ({ record, onPress }: { record: ScanRecord, onPress: (record: ScanRecord) => void }) => {
-    const color = record.isSuccessful ? "#10B981" : "#EF4444"; // Success (Green) / Failure (Red)
+    const color = record.isSuccessful ? "#10B981" : "#EF4444"; 
     const iconName = record.isSuccessful ? "checkmark-circle-outline" : "close-circle-outline";
     const statusText = record.isSuccessful 
         ? `Successful at ${record.scanTime}` 
@@ -243,8 +231,6 @@ const ScanHistoryItem = ({ record, onPress }: { record: ScanRecord, onPress: (re
     );
 };
 
-
-// --- Stylesheet ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,

@@ -19,6 +19,7 @@ export default function RootLayout() {
         <Stack.Screen name="(diner)" options={{ headerShown: false }} />
         <Stack.Screen name="(manager)" options={{ headerShown: false }} />        
         <Stack.Screen name="(dining-boy)" options={{ headerShown: false }} />
+        <Stack.Screen name="(hall-authority)" options={{ headerShown: false }} />
 
       </Stack>
       <StatusBar style="auto" />
