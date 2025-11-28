@@ -71,7 +71,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+<<<<<<< HEAD
     backgroundColor: '#f7f8fa', 
+=======
+    backgroundColor: '#f7f8fa', // or your theme background
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   },
   hallName: {
     textAlign: 'center',
@@ -89,11 +93,19 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     marginHorizontal: 8,
     borderRadius: 24,
+<<<<<<< HEAD
     backgroundColor: '#ffffff', 
     alignItems: 'center',
   },
   selectorButtonActive: {
     backgroundColor: '#b09160', 
+=======
+    backgroundColor: '#ffffff', // inactive
+    alignItems: 'center',
+  },
+  selectorButtonActive: {
+    backgroundColor: '#b09160', // your active color (brown-ish)
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   },
   selectorText: {
     fontSize: 16,
@@ -112,7 +124,11 @@ const styles = StyleSheet.create({
   qrImage: {
     width: 300,
     height: 300,
+<<<<<<< HEAD
     backgroundColor: '#eaf0fc', 
+=======
+    backgroundColor: '#eaf0fc', // placeholder
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   },
   bottomNav: {
     flexDirection: 'row',

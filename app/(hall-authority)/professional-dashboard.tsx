@@ -8,13 +8,19 @@ import {
   ActivityIndicator,
   Alert,
   TextInput,
+<<<<<<< HEAD
   Image
+=======
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { router } from 'expo-router';
+<<<<<<< HEAD
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '@/constants/api';
+=======
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
 
 type AuthorityTab = 'Dashboard' | 'HallInfo' | 'Managers' | 'Halls';
 
@@ -33,11 +39,18 @@ interface HallInfo {
 }
 
 interface Manager {
+<<<<<<< HEAD
   _id: string; 
   name: string;
   email: string;
   hallName: string;
   role: string;
+=======
+  id: string;
+  name: string;
+  email: string;
+  hallName: string;
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
 }
 
 interface Hall {
@@ -49,6 +62,68 @@ interface Hall {
   description: string;
 }
 
+<<<<<<< HEAD
+=======
+// ---- Mock Data Fetcher for Hall Authority ----
+const fetchAuthorityData = async (): Promise<{
+  earnings: MonthlyEarning[];
+  hallInfo: HallInfo;
+  managers: Manager[];
+  halls: Hall[];
+}> => {
+  await new Promise(resolve => setTimeout(resolve, 800));
+
+  return {
+    earnings: [
+      { id: 'e1', monthLabel: 'Nov 2025', amount: 180000 },
+      { id: 'e2', monthLabel: 'Oct 2025', amount: 165000 },
+      { id: 'e3', monthLabel: 'Sep 2025', amount: 150000 },
+      { id: 'e4', monthLabel: 'Aug 2025', amount: 142000 },
+    ],
+    hallInfo: {
+      name: 'Muktijoddha Hall',
+      address: 'University Campus, Block A',
+      contactEmail: 'hall.authority@univ.edu',
+      contactPhone: '+8801XXXXXXXXX',
+      notice: 'Mess bill payment deadline: 25th of every month.',
+    },
+    managers: [
+      {
+        id: 'm1',
+        name: 'Mr. Karim',
+        email: 'karim.manager@hall.edu',
+        hallName: 'Muktijoddha Hall',
+      },
+      {
+        id: 'm2',
+        name: 'Ms. Rahima',
+        email: 'rahima.manager@hall.edu',
+        hallName: 'Bangabandhu Hall',
+      },
+    ],
+    halls: [
+      {
+        id: 'h1',
+        name: 'Muktijoddha Hall',
+        email: 'muktijoddha@hall.edu',
+        address: 'Campus North Zone',
+        capacity: 300,
+        description: 'Residential hall for 300 students with dining facility.',
+      },
+      {
+        id: 'h2',
+        name: 'Bangabandhu Hall',
+        email: 'bangabandhu@hall.edu',
+        address: 'Campus South Zone',
+        capacity: 250,
+        description: 'Residential hall with attached study and dining facility.',
+      },
+    ],
+  };
+};
+
+// --- Re-usable Small Stat Card ---
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
 const SmallStatCard = ({
   label,
   value,
@@ -65,6 +140,10 @@ const SmallStatCard = ({
   </View>
 );
 
+<<<<<<< HEAD
+=======
+// --- Tab Button ---
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
 const TabButton = ({
   tab,
   activeTab,
@@ -91,6 +170,10 @@ const TabButton = ({
   </TouchableOpacity>
 );
 
+<<<<<<< HEAD
+=======
+// --- Hall Info Section (Update-able) ---
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
 const HallInfoSection = ({
   hallInfo,
   onUpdate,
@@ -166,6 +249,7 @@ const HallInfoSection = ({
   );
 };
 
+<<<<<<< HEAD
 const ManagersSection = ({
   managers,
   onRemove,
@@ -189,11 +273,70 @@ const ManagersSection = ({
   searching: boolean;
   loadingAction: boolean;
 }) => {
+=======
+// --- Managers Section (Add / Remove) ---
+const ManagersSection = ({
+  managers,
+  onAdd,
+  onRemove,
+}: {
+  managers: Manager[];
+  onAdd: (m: Omit<Manager, 'id'>) => void;
+  onRemove: (id: string) => void;
+}) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [hallName, setHallName] = useState('');
+
+  const handleAdd = () => {
+    if (!name.trim() || !email.trim() || !hallName.trim()) {
+      Alert.alert(
+        'Missing Info',
+        'Please enter manager name, email and hall name.'
+      );
+      return;
+    }
+    if (!email.includes('@')) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      return;
+    }
+
+    onAdd({
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      hallName: hallName.trim(),
+    });
+
+    setName('');
+    setEmail('');
+    setHallName('');
+    Alert.alert('Success', 'Manager has been added successfully.');
+  };
+
+  const confirmRemove = (manager: Manager) => {
+    Alert.alert(
+      'Remove Manager',
+      `Are you sure you want to remove manager with email: ${manager.email}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => {
+            onRemove(manager.id);
+            Alert.alert('Removed', 'Manager removed successfully.');
+          },
+        },
+      ]
+    );
+  };
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
 
   return (
     <View style={styles.sectionContainer}>
       <Text style={styles.sectionHeader}>Manage Hall Managers</Text>
 
+<<<<<<< HEAD
       <View style={styles.assignmentCard}>
         <Text style={{fontSize: 14, color: '#666', marginBottom: 10}}>
            Search existing student to appoint as manager:
@@ -247,10 +390,43 @@ const ManagersSection = ({
         )}
       </View>
 
+=======
+      {/* Add Manager */}
+      <View style={styles.assignmentCard}>
+        <TextInput
+          style={styles.input}
+          placeholder="Manager Full Name"
+          value={name}
+          onChangeText={setName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Manager Email (used for add/remove)"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Hall Name (e.g., Muktijoddha Hall)"
+          value={hallName}
+          onChangeText={setHallName}
+        />
+
+        <TouchableOpacity style={styles.assignButton} onPress={handleAdd}>
+          <Ionicons name="person-add-outline" size={20} color="#fff" />
+          <Text style={styles.assignButtonText}>Add Manager</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* List Managers */}
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
       <Text style={[styles.sectionHeader, { marginTop: 20 }]}>
         Current Managers ({managers.length})
       </Text>
       <ScrollView style={styles.scrollSection}>
+<<<<<<< HEAD
         {managers.length === 0 ? (
           <Text style={styles.noDataText}>
             No managers found. Search and promote a student.
@@ -278,12 +454,37 @@ const ManagersSection = ({
                 </TouchableOpacity>
             </View>
             ))
+=======
+        {managers.map(m => (
+          <View key={m.id} style={styles.diningBoyItem}>
+            <View style={styles.diningBoyDetails}>
+              <Text style={styles.diningBoyName}>{m.name}</Text>
+              <Text style={styles.diningBoyEmail}>{m.email}</Text>
+              <Text style={styles.diningBoyDate}>Hall: {m.hallName}</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.removeButton}
+              onPress={() => confirmRemove(m)}
+            >
+              <Ionicons name="trash-outline" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        ))}
+        {managers.length === 0 && (
+          <Text style={styles.noDataText}>
+            No managers found. Please add a manager.
+          </Text>
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
         )}
       </ScrollView>
     </View>
   );
 };
 
+<<<<<<< HEAD
+=======
+// --- Halls Section (Add only, never delete) ---
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
 const HallsSection = ({
   halls,
   onAddHall,
@@ -298,8 +499,39 @@ const HallsSection = ({
   const [description, setDescription] = useState('');
 
   const handleAddHall = () => {
+<<<<<<< HEAD
     // Mock Implementation for now
     Alert.alert('Feature Pending', 'Add Hall API is not integrated yet.');
+=======
+    if (!name.trim() || !email.trim()) {
+      Alert.alert('Validation', 'Hall name and email are required.');
+      return;
+    }
+    const capNumber = Number(capacity);
+    if (capacity && (isNaN(capNumber) || capNumber <= 0)) {
+      Alert.alert('Invalid Capacity', 'Please enter a valid capacity number.');
+      return;
+    }
+
+    onAddHall({
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      address: address.trim(),
+      capacity: capNumber || 0,
+      description: description.trim(),
+    });
+
+    setName('');
+    setEmail('');
+    setAddress('');
+    setCapacity('');
+    setDescription('');
+
+    Alert.alert(
+      'Hall Added',
+      'New hall has been added. Hall records are never deleted.'
+    );
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   };
 
   return (
@@ -307,11 +539,48 @@ const HallsSection = ({
       <Text style={styles.sectionHeader}>Add New Hall</Text>
 
       <View style={styles.assignmentCard}>
+<<<<<<< HEAD
         <TextInput style={styles.input} placeholder="Hall Name" value={name} onChangeText={setName} />
         <TextInput style={styles.input} placeholder="Hall Email" value={email} onChangeText={setEmail} />
         <TextInput style={styles.input} placeholder="Hall Address" value={address} onChangeText={setAddress} />
         <TextInput style={styles.input} placeholder="Capacity" value={capacity} onChangeText={setCapacity} keyboardType="numeric"/>
         <TextInput style={[styles.input, { height: 80 }]} placeholder="Description / Notes" value={description} onChangeText={setDescription} multiline />
+=======
+        <TextInput
+          style={styles.input}
+          placeholder="Hall Name"
+          value={name}
+          onChangeText={setName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Hall Email (e.g., hall@univ.edu)"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Hall Address"
+          value={address}
+          onChangeText={setAddress}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Capacity (optional)"
+          value={capacity}
+          onChangeText={setCapacity}
+          keyboardType="numeric"
+        />
+        <TextInput
+          style={[styles.input, { height: 80 }]}
+          placeholder="Description / Notes"
+          value={description}
+          onChangeText={setDescription}
+          multiline
+        />
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
 
         <TouchableOpacity style={styles.assignButton} onPress={handleAddHall}>
           <Ionicons name="business-outline" size={20} color="#fff" />
@@ -319,14 +588,47 @@ const HallsSection = ({
         </TouchableOpacity>
       </View>
 
+<<<<<<< HEAD
       <Text style={[styles.sectionHeader, { marginTop: 20 }]}>All Halls</Text>
       <ScrollView style={styles.scrollSection}>
          <Text style={styles.noDataText}>No halls found.</Text>
+=======
+      <Text style={[styles.sectionHeader, { marginTop: 20 }]}>
+        All Halls ({halls.length})
+      </Text>
+      <ScrollView style={styles.scrollSection}>
+        {halls.map(h => (
+          <View key={h.id} style={styles.diningBoyItem}>
+            <View style={styles.diningBoyDetails}>
+              <Text style={styles.diningBoyName}>{h.name}</Text>
+              <Text style={styles.diningBoyEmail}>{h.email}</Text>
+              <Text style={styles.diningBoyDate}>
+                Capacity: {h.capacity || 'N/A'}
+              </Text>
+              {!!h.address && (
+                <Text style={styles.diningBoyDate}>Address: {h.address}</Text>
+              )}
+              {!!h.description && (
+                <Text style={styles.diningBoyDate}>
+                  Note: {h.description}
+                </Text>
+              )}
+            </View>
+            {/* NOTE: No delete button here (halls are never deleted) */}
+          </View>
+        ))}
+        {halls.length === 0 && (
+          <Text style={styles.noDataText}>
+            No halls found. Start by adding a hall.
+          </Text>
+        )}
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
       </ScrollView>
     </View>
   );
 };
 
+<<<<<<< HEAD
 
 export default function HallAuthorityDashboard() {
   const [earnings, setEarnings] = useState<MonthlyEarning[]>([
@@ -344,11 +646,25 @@ export default function HallAuthorityDashboard() {
     notice: 'Mess bill payment deadline: 25th of every month.',
   });
 
+=======
+// --- Main Hall Authority Dashboard Component ---
+
+export default function HallAuthorityDashboard() {
+  const [earnings, setEarnings] = useState<MonthlyEarning[]>([]);
+  const [hallInfo, setHallInfo] = useState<HallInfo>({
+    name: '',
+    address: '',
+    contactEmail: '',
+    contactPhone: '',
+    notice: '',
+  });
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   const [managers, setManagers] = useState<Manager[]>([]);
   const [halls, setHalls] = useState<Hall[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<AuthorityTab>('Dashboard');
 
+<<<<<<< HEAD
   // Search States
   const [searchEmail, setSearchEmail] = useState('');
   const [foundStudent, setFoundStudent] = useState<any>(null);
@@ -471,6 +787,20 @@ export default function HallAuthorityDashboard() {
     router.replace('/login');
   };
 
+=======
+  useEffect(() => {
+    setLoading(true);
+    fetchAuthorityData().then(data => {
+      setEarnings(data.earnings);
+      setHallInfo(data.hallInfo);
+      setManagers(data.managers);
+      setHalls(data.halls);
+      setLoading(false);
+    });
+  }, []);
+
+  // Derived stats
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   const totalThisMonth = earnings[0]?.amount ?? 0;
   const totalLastMonth = earnings[1]?.amount ?? 0;
   const totalThisYear = earnings.reduce((sum, e) => sum + e.amount, 0);
@@ -479,6 +809,12 @@ export default function HallAuthorityDashboard() {
       ? 0
       : Math.round(((totalThisMonth - totalLastMonth) / totalLastMonth) * 100);
 
+<<<<<<< HEAD
+=======
+  const totalHalls = halls.length;
+  const totalManagers = managers.length;
+
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   if (loading) {
     return (
       <View style={[styles.container, styles.loadingContainer]}>
@@ -493,15 +829,28 @@ export default function HallAuthorityDashboard() {
       case 'Dashboard':
         return (
           <View>
+<<<<<<< HEAD
             <View style={styles.statusCard}>
               <View style={styles.cardHeader}>
                 <Text style={styles.cardHeaderText}>
                   <Ionicons name="cash-outline" size={18} color="#10B981"/>{' '}
+=======
+            {/* Earnings Overview */}
+            <View style={styles.statusCard}>
+              <View style={styles.cardHeader}>
+                <Text style={styles.cardHeaderText}>
+                  <Ionicons
+                    name="cash-outline"
+                    size={18}
+                    color="#10B981"
+                  />{' '}
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
                   Earnings Overview
                 </Text>
               </View>
 
               <View style={styles.statsRow}>
+<<<<<<< HEAD
                 <SmallStatCard label="This Month" value={`${totalThisMonth} ৳`} subtitle={earnings[0]?.monthLabel} />
                 <SmallStatCard label="Last Month" value={`${totalLastMonth} ৳`} subtitle={earnings[1]?.monthLabel} />
               </View>
@@ -519,6 +868,87 @@ export default function HallAuthorityDashboard() {
                   Monthly Earnings (Recent)
                 </Text>
               </View>
+=======
+                <SmallStatCard
+                  label="This Month"
+                  value={`${totalThisMonth} ৳`}
+                  subtitle={earnings[0]?.monthLabel}
+                />
+                <SmallStatCard
+                  label="Last Month"
+                  value={`${totalLastMonth} ৳`}
+                  subtitle={earnings[1]?.monthLabel}
+                />
+              </View>
+
+              <View style={[styles.statsRow, { marginTop: 10 }]}>
+                <SmallStatCard
+                  label="This Year Total"
+                  value={`${totalThisYear} ৳`}
+                />
+                <SmallStatCard
+                  label="Growth"
+                  value={`${earningGrowth}%`}
+                  subtitle="vs. last month"
+                />
+              </View>
+            </View>
+
+            {/* Hall & Manager Stats */}
+            {/* <View style={styles.statusCard}>
+              <View style={styles.cardHeader}>
+                <Text style={styles.cardHeaderText}>
+                  <Ionicons
+                    name="business-outline"
+                    size={18}
+                    color="#6366F1"
+                  />{' '}
+                  Hall & Manager Status
+                </Text>
+              </View>
+
+              <View style={styles.statsRow}>
+                <SmallStatCard
+                  label="Total Halls"
+                  value={totalHalls}
+                  subtitle="Registered"
+                />
+                <SmallStatCard
+                  label="Total Managers"
+                  value={totalManagers}
+                  subtitle="Active"
+                />
+              </View>
+
+              <View style={styles.infoBox}>
+                <Text style={styles.infoText}>
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={16}
+                    color="#4F46E5"
+                  />{' '}
+                  Use <Text style={{ fontWeight: '700' }}>Hall Info</Text> to
+                  update main hall details and{' '}
+                  <Text style={{ fontWeight: '700' }}>Halls</Text> tab to add
+                  new halls.
+                </Text>
+              </View>
+            </View> */}
+
+            {/* Recent Months List */}
+            <View style={styles.statusCard}>
+              <View style={styles.cardHeader}>
+                <Text style={styles.cardHeaderText}>
+                  <Ionicons
+                    name="calendar-outline"
+                    size={18}
+                    color="#F97316"
+                  />{' '}
+                  Monthly Earnings (Recent)
+                </Text>
+              </View>
+
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
               {earnings.map(e => (
                 <View key={e.id} style={styles.earningRow}>
                   <Text style={styles.earningMonth}>{e.monthLabel}</Text>
@@ -538,6 +968,7 @@ export default function HallAuthorityDashboard() {
         return (
           <ManagersSection
             managers={managers}
+<<<<<<< HEAD
             onRemove={handleRemoveManager}
             searchEmail={searchEmail}
             setSearchEmail={setSearchEmail}
@@ -547,6 +978,17 @@ export default function HallAuthorityDashboard() {
             handlePromote={handlePromote}
             searching={searching}
             loadingAction={loadingAction}
+=======
+            onAdd={m => {
+              setManagers(prev => [
+                ...prev,
+                { id: `m${Date.now()}`, ...m },
+              ]);
+            }}
+            onRemove={id => {
+              setManagers(prev => prev.filter(m => m.id !== id));
+            }}
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
           />
         );
 
@@ -554,7 +996,13 @@ export default function HallAuthorityDashboard() {
         return (
           <HallsSection
             halls={halls}
+<<<<<<< HEAD
             onAddHall={h => setHalls(prev => [...prev, { id: `h${Date.now()}`, ...h }])}
+=======
+            onAddHall={h =>
+              setHalls(prev => [...prev, { id: `h${Date.now()}`, ...h }])
+            }
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
           />
         );
 
@@ -570,6 +1018,7 @@ export default function HallAuthorityDashboard() {
         Central Hall Control & Monitoring
       </Text>
 
+<<<<<<< HEAD
       <View style={styles.tabBar}>
         <TabButton tab="Dashboard" activeTab={activeTab} onPress={setActiveTab} icon="grid-outline" />
         <TabButton tab="HallInfo" activeTab={activeTab} onPress={setActiveTab} icon="information-circle-outline" />
@@ -582,6 +1031,49 @@ export default function HallAuthorityDashboard() {
       </ScrollView>
 
       <TouchableOpacity onPress={handleLogout} style={styles.logout}>
+=======
+      {/* Tab Bar */}
+      <View style={styles.tabBar}>
+        <TabButton
+          tab="Dashboard"
+          activeTab={activeTab}
+          onPress={setActiveTab}
+          icon="grid-outline"
+        />
+        <TabButton
+          tab="HallInfo"
+          activeTab={activeTab}
+          onPress={setActiveTab}
+          icon="information-circle-outline"
+        />
+        <TabButton
+          tab="Managers"
+          activeTab={activeTab}
+          onPress={setActiveTab}
+          icon="people-outline"
+        />
+        <TabButton
+          tab="Halls"
+          activeTab={activeTab}
+          onPress={setActiveTab}
+          icon="business-outline"
+        />
+      </View>
+
+      {/* Content */}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {renderCurrentTab()}
+      </ScrollView>
+
+      {/* Logout */}
+      <TouchableOpacity
+        onPress={() => router.push('/login')}
+        style={styles.logout}
+      >
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
         <AntDesign name="logout" size={24} color="#1F2937" />
       </TouchableOpacity>
     </View>
@@ -705,6 +1197,21 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     marginTop: 1,
   },
+<<<<<<< HEAD
+=======
+  infoBox: {
+    backgroundColor: '#EEF2FF',
+    padding: 12,
+    borderRadius: 10,
+    marginTop: 15,
+    borderLeftWidth: 4,
+    borderLeftColor: '#4F46E5',
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#4F46E5',
+  },
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   earningRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -809,4 +1316,8 @@ const styles = StyleSheet.create({
     right: 20,
     padding: 5,
   },
+<<<<<<< HEAD
 });
+=======
+});
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -7,6 +8,13 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { router, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '@/constants/api';
+=======
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons'; 
+import AntDesign from '@expo/vector-icons/AntDesign';
+import { router } from 'expo-router';
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
 
 interface MealStatus {
   totalMealsToday: number;
@@ -27,6 +35,7 @@ const HALL_TIMINGS = {
   DINNER_START: 20, 
 };
 
+<<<<<<< HEAD
 
 const INITIAL_STATUS: MealStatus = {
   totalMealsToday: 180, 
@@ -90,6 +99,37 @@ const fetchDiningBoyData = async (): Promise<{ status: MealStatus, history: Scan
 
 export default function DiningBoyDashboard() {
   const [mealStatus, setMealStatus] = useState<MealStatus>(INITIAL_STATUS);
+=======
+const mockScanHistory: ScanRecord[] = [
+  { id: '2104090-L-121212', meal: 'Lunch', date: '10 Nov 2025', isSuccessful: true, scanTime: '13:05' },
+  { id: '2104091-D-121213', meal: 'Dinner', date: '10 Nov 2025', isSuccessful: true, scanTime: '20:15' },
+  { id: '2104092-L-121214', meal: 'Lunch', date: '09 Nov 2025', isSuccessful: false, scanTime: '12:45' },
+];
+
+
+const fetchDiningBoyData = async (): Promise<{ status: MealStatus, history: ScanRecord[] }> => {
+  await new Promise(resolve => setTimeout(resolve, 800));
+  
+  const total = 180;
+  const mealsEatenCount = mockScanHistory.filter(r => r.isSuccessful).length;
+
+  return {
+    status: {
+      totalMealsToday: total,
+      mealsEaten: mealsEatenCount,
+      nextFeastAnnouncement: 'Monthly special dinner on 20 Nov 2025!',
+    },
+    history: mockScanHistory,
+  };
+};
+
+export default function DiningBoyDashboard() {
+  const [mealStatus, setMealStatus] = useState<MealStatus>({
+    totalMealsToday: 0,
+    mealsEaten: 0,
+    nextFeastAnnouncement: null,
+  });
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   const [scanHistory, setScanHistory] = useState<ScanRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -121,6 +161,7 @@ export default function DiningBoyDashboard() {
   const hoursUntilNextMeal = Math.floor(timeDifferenceMs / (1000 * 60 * 60));
   const minutesUntilNextMeal = Math.ceil((timeDifferenceMs % (1000 * 60 * 60)) / (1000 * 60));
 
+<<<<<<< HEAD
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
@@ -137,6 +178,16 @@ export default function DiningBoyDashboard() {
       return () => { isActive = false; };
     }, [])
   );
+=======
+  useEffect(() => {
+    setLoading(true);
+    fetchDiningBoyData().then(data => {
+      setMealStatus(data.status);
+      setScanHistory(data.history);
+      setLoading(false);
+    });
+  }, []);
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
 
   const handleViewToken = (record: ScanRecord) => {
     Alert.alert(
@@ -150,11 +201,19 @@ export default function DiningBoyDashboard() {
     return (
       <View style={[styles.container, styles.loadingContainer]}>
         <ActivityIndicator size="large" color="#007AFF" />
+<<<<<<< HEAD
         <Text style={styles.loadingText}>Loading history...</Text>
+=======
+        <Text style={styles.loadingText}>Loading hall management info...</Text>
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
       </View>
     );
   }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   const formatCountdown = (h: number, m: number) => {
       if (h > 0) return `${h} hr ${m} min`;
       if (m > 0) return `${m} minutes`;
@@ -192,8 +251,13 @@ export default function DiningBoyDashboard() {
 
             <View style={styles.statsRow}>
                 <MealStat label="Total Tokens" value={mealStatus.totalMealsToday} width={'33%'} />
+<<<<<<< HEAD
                 <MealStat label="Successfull Scan" value={mealStatus.mealsEaten} width={'33%'} />
                 <MealStat label="Invalid Scan" value={0} width={'33%'} highlight={true} />
+=======
+                <MealStat label="Successfull Scan" value={mealStatus.totalMealsToday-10} width={'33%'} />
+                <MealStat label="Invalid Scan" value={mealStatus.mealsEaten} width={'33%'} highlight={true} />
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
             </View>
 
             {tokenWarning && (
@@ -315,6 +379,10 @@ const styles = StyleSheet.create({
     marginTop: 15,
     marginBottom: 10,
   },
+<<<<<<< HEAD
+=======
+  // 1. Timeline Card Styles
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   timelineCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -351,6 +419,10 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRadius: 6,
   },
+<<<<<<< HEAD
+=======
+  // 2. Status Card Styles
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   statusCard: {
     backgroundColor: '#ffffff',
     borderRadius: 12,
@@ -401,6 +473,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
+<<<<<<< HEAD
+=======
+  // 3. Announcement Card Styles
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   announcementCard: {
     backgroundColor: '#F3E8FF',
     padding: 15,
@@ -423,6 +499,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#C026D3',
   },
+<<<<<<< HEAD
+=======
+  // 4. Scan History Item Styles
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   historyItemButton: {
     backgroundColor: '#fff',
     padding: 15,
@@ -460,7 +540,11 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     fontStyle: 'italic',
   },
+<<<<<<< HEAD
 
+=======
+  // Logout Styles
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   logout: {
     position: 'absolute',
     top: 50,

@@ -180,6 +180,10 @@ export default function QrScannerScreen() {
       {/* Header */}
       <View>
         <Text style={styles.hallName}>Muktijoddha Hall</Text>
+<<<<<<< HEAD
+=======
+        {/* <Text style={styles.subtitle}>Dining Token QR Scanner</Text> */}
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
       </View>
 
       <View style={styles.scannerArea}>
@@ -368,6 +372,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     marginBottom: 20,
     flexDirection: "row",
+<<<<<<< HEAD
+=======
+    // removed 'gap' for better RN compatibility
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   },
   scanButtonText: {
     color: "#fff",

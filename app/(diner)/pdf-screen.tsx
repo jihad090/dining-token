@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 
 import React, { useState } from 'react';
@@ -150,11 +151,20 @@ export default function PdfScreen() {
     );
   }
 
+=======
+import React from 'react';
+import { StyleSheet, View, TouchableOpacity, Text, Image } from 'react-native';
+import { ThemedView } from '@/components/themed-view';
+import { ThemedText } from '@/components/themed-text';
+
+export default function PdfScreen() {
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="title" style={styles.hallName}>Muktijoddha Hall</ThemedText>
       <ThemedText type="subtitle" style={styles.subtitle}>All Token PDF</ThemedText>
 
+<<<<<<< HEAD
       <View style={styles.gridWrapper}>
         <ScrollView contentContainerStyle={styles.gridScroll}>
           {tokens.length === 0 ? (
@@ -196,6 +206,19 @@ export default function PdfScreen() {
         ) : (
           <Text style={styles.downloadButtonText}>Download PDF</Text>
         )}
+=======
+      <View style={styles.pdfContainer}>
+
+        <Image
+          source={require('../../assets/images/tokenListImage.png')}
+          style={styles.pdfPreview}
+          resizeMode="cover"
+        />
+      </View>
+
+      <TouchableOpacity style={styles.downloadButton} onPress={() => {/* handle download logic */}}>
+        <Text style={styles.downloadButtonText}>Download PDF</Text>
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
       </TouchableOpacity>
     </ThemedView>
   );
@@ -215,11 +238,16 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   subtitle: {
+<<<<<<< HEAD
      textAlign: 'center',
+=======
+    textAlign: 'center',
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
     marginBottom: 24,
     fontSize: 16,
     color: '#666',
   },
+<<<<<<< HEAD
   
   gridWrapper: {
     flex: 1,
@@ -286,6 +314,18 @@ const styles = StyleSheet.create({
     marginTop: 50,
     color: '#999',
     fontSize: 16
+=======
+  pdfContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pdfPreview: {
+    width: '100%',
+    height: 500,
+    backgroundColor: '#eaf0fc',
+    marginBottom: 24,
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   },
   downloadButton: {
     height: 48,
@@ -301,4 +341,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+<<<<<<< HEAD
 });
+=======
+});
+>>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
