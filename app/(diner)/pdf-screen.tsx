@@ -1,19 +1,14 @@
-<<<<<<< HEAD
-
-
 import React, { useState } from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  TouchableOpacity, 
-  Text, 
-  ScrollView, 
-  ActivityIndicator, 
+import {
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  Text,
+  ScrollView,
+  ActivityIndicator,
   Alert,
   Dimensions
 } from 'react-native';
-import { ThemedView } from '@/components/themed-view';
-import { ThemedText } from '@/components/themed-text';
 import { useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '@/constants/api';
@@ -23,8 +18,8 @@ import QRCode from 'react-native-qrcode-svg';
 
 const COLUMNS = 6;
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const PADDING = 1; 
-const GAP = 2; 
+const PADDING = 1;
+const GAP = 2;
 const ITEM_WIDTH = (SCREEN_WIDTH - PADDING - (GAP * (COLUMNS - 1))) / COLUMNS;
 
 interface Token {
@@ -113,11 +108,11 @@ export default function PdfScreen() {
             <h2>All Token PDF</h2>
             <div class="grid-container">
               ${tokens.map(token => {
-                const date = new Date(token.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
-                // Generate QR URL
-                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${token.tokenID}`;
-                
-                return `
+        const date = new Date(token.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+        // Generate QR URL
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${token.tokenID}`;
+
+        return `
                   <div class="token-card">
                     <span class="date">${date}</span>
                     <img src="${qrUrl}" class="qr-code" />
@@ -127,7 +122,7 @@ export default function PdfScreen() {
                     </div>
                   </div>
                 `;
-              }).join('')}
+      }).join('')}
             </div>
           </body>
         </html>
@@ -151,20 +146,11 @@ export default function PdfScreen() {
     );
   }
 
-=======
-import React from 'react';
-import { StyleSheet, View, TouchableOpacity, Text, Image } from 'react-native';
-import { ThemedView } from '@/components/themed-view';
-import { ThemedText } from '@/components/themed-text';
-
-export default function PdfScreen() {
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.hallName}>Muktijoddha Hall</ThemedText>
-      <ThemedText type="subtitle" style={styles.subtitle}>All Token PDF</ThemedText>
+    <View style={styles.container}>
+      <Text style={styles.hallName}>Muktijoddha Hall</Text>
+      <Text style={styles.subtitle}>All Token PDF</Text>
 
-<<<<<<< HEAD
       <View style={styles.gridWrapper}>
         <ScrollView contentContainerStyle={styles.gridScroll}>
           {tokens.length === 0 ? (
@@ -190,14 +176,14 @@ export default function PdfScreen() {
                   </View>
                 </View>
               ))}
-              
+
             </View>
           )}
         </ScrollView>
       </View>
 
-      <TouchableOpacity 
-        style={styles.downloadButton} 
+      <TouchableOpacity
+        style={styles.downloadButton}
         onPress={handleDownloadPdf}
         disabled={generatingPdf}
       >
@@ -206,21 +192,8 @@ export default function PdfScreen() {
         ) : (
           <Text style={styles.downloadButtonText}>Download PDF</Text>
         )}
-=======
-      <View style={styles.pdfContainer}>
-
-        <Image
-          source={require('../../assets/images/tokenListImage.png')}
-          style={styles.pdfPreview}
-          resizeMode="cover"
-        />
-      </View>
-
-      <TouchableOpacity style={styles.downloadButton} onPress={() => {/* handle download logic */}}>
-        <Text style={styles.downloadButtonText}>Download PDF</Text>
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
       </TouchableOpacity>
-    </ThemedView>
+    </View>
   );
 }
 
@@ -236,22 +209,19 @@ const styles = StyleSheet.create({
     marginTop: 50,
     marginBottom: 8,
     color: 'black',
+    fontSize: 20,
+    fontWeight: 'bold'
   },
   subtitle: {
-<<<<<<< HEAD
-     textAlign: 'center',
-=======
     textAlign: 'center',
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
     marginBottom: 24,
     fontSize: 16,
     color: '#666',
   },
-<<<<<<< HEAD
-  
+
   gridWrapper: {
     flex: 1,
-    backgroundColor: '#fff', 
+    backgroundColor: '#fff',
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ddd',
@@ -265,14 +235,14 @@ const styles = StyleSheet.create({
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'flex-start', 
+    justifyContent: 'flex-start',
     gap: GAP,
     width: '100%'
   },
-  
+
   card: {
     width: ITEM_WIDTH,
-    height: ITEM_WIDTH * 1.3, 
+    height: ITEM_WIDTH * 1.3,
     borderWidth: 1,
     borderColor: '#333',
     borderRadius: 4,
@@ -287,7 +257,7 @@ const styles = StyleSheet.create({
     color: '#333'
   },
   qrContainer: {
-    overflow: 'hidden', 
+    overflow: 'hidden',
   },
   cardFooter: {
     flexDirection: 'row',
@@ -314,18 +284,6 @@ const styles = StyleSheet.create({
     marginTop: 50,
     color: '#999',
     fontSize: 16
-=======
-  pdfContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pdfPreview: {
-    width: '100%',
-    height: 500,
-    backgroundColor: '#eaf0fc',
-    marginBottom: 24,
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   },
   downloadButton: {
     height: 48,
@@ -341,8 +299,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-<<<<<<< HEAD
 });
-=======
-});
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416

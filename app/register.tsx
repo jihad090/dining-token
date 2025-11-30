@@ -1,58 +1,30 @@
 import React, { useState } from 'react';
-<<<<<<< HEAD
 import { StyleSheet, TextInput, TouchableOpacity, Text, View, Alert } from 'react-native';
 import { Stack, Link, router } from 'expo-router';
 import { API_BASE_URL } from '../constants/api';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-
-=======
-import { StyleSheet, TextInput, TouchableOpacity, Text, View } from 'react-native';
-import { Stack, Link, router } from 'expo-router';
-
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-
-import DropDownPicker from 'react-native-dropdown-picker';
-
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
 export default function RegisterScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-<<<<<<< HEAD
-=======
-  const [hall, setHall] = useState<string | null>(null);
 
-  // For DropDownPicker state
-  const [openHall, setOpenHall] = useState(false);
-  const [hallItems, setHallItems] = useState([
-    { label: 'MJ', value: 'hallA' },
-    { label: 'QK', value: 'hallB' },
-    { label: 'North', value: 'hallC' },
-    { label: 'South', value: 'hallD' },
-  ]);
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
     setError(null);
-<<<<<<< HEAD
 
     if (!name || !email || !password) {
-        setError('Please fill in all fields');
-        return;
+      setError('Please fill in all fields');
+      return;
     }
-=======
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-<<<<<<< HEAD
 
     setLoading(true);
 
@@ -77,9 +49,9 @@ export default function RegisterScreen() {
 
       console.log('Registration Success:', data);
       Alert.alert('Success', 'Account created successfully!', [
-        { 
-            text: 'OK', 
-            onPress: () => router.push('/login') 
+        {
+          text: 'OK',
+          onPress: () => router.push('/login')
         }
       ]);
 
@@ -89,22 +61,6 @@ export default function RegisterScreen() {
     } finally {
       setLoading(false);
     }
-=======
-    if (!hall) {
-      setError('Please select your hall');
-      return;
-    }
-    setLoading(true);
-    try {
-      console.log('Registering', { name, email, password, hall });
-      // TODO: registration API call
-    } catch (e) {
-      setError('Registration failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-    router.push('/otp-screen');
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   };
 
   return (
@@ -131,23 +87,7 @@ export default function RegisterScreen() {
         onChangeText={setEmail}
       />
 
-<<<<<<< HEAD
-=======
-      {/* Dropdown for selecting hall */}
-      <DropDownPicker
-        open={openHall}
-        value={hall}
-        items={hallItems}
-        setOpen={setOpenHall}
-        setValue={setHall}
-        setItems={setHallItems}
-        placeholder="Select your hall"
-        style={styles.input}
-        dropDownContainerStyle={styles.dropdownContainer}
-        zIndex={1000}       // ensure dropdown appears above other fields
-      />
 
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
       <TextInput
         style={styles.input}
         placeholder="Create a password"
@@ -171,11 +111,7 @@ export default function RegisterScreen() {
         onPress={handleSignUp}
         disabled={loading}
       >
-<<<<<<< HEAD
         <Text style={styles.buttonText}>{loading ? 'Signing Up...' : 'Sign Up'}</Text>
-=======
-        <Text style={styles.buttonText}>{loading ? 'Sending OTP…' : 'Send OTP'}</Text>
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
       </TouchableOpacity>
 
       <View style={styles.loginContainer}>
@@ -215,13 +151,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingHorizontal: 12,
   },
-<<<<<<< HEAD
-=======
-  dropdownContainer: {
-    borderColor: '#ccc',
-    marginBottom: 16,
-  },
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
+
   button: {
     height: 48,
     backgroundColor: '#0066cc',
@@ -251,8 +181,4 @@ const styles = StyleSheet.create({
     color: '#0066cc',
     fontWeight: 'bold',
   },
-<<<<<<< HEAD
 });
-=======
-});
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416

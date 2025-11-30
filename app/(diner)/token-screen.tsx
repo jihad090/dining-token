@@ -1,13 +1,13 @@
-<<<<<<< HEAD
 import React, { useState, useCallback, useEffect } from 'react';
-import { 
-  StyleSheet, View, Text, ActivityIndicator, RefreshControl, ScrollView, TouchableOpacity 
+import {
+  StyleSheet, View, Text, ActivityIndicator, RefreshControl, ScrollView, TouchableOpacity
 } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '@/constants/api';
 import QRCode from 'react-native-qrcode-svg';
+
 interface ActiveToken {
   _id: string;
   tokenID: string;
@@ -20,7 +20,7 @@ export default function TokenScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTokens, setActiveTokens] = useState<ActiveToken[]>([]);
-  
+
   const [selectedMeal, setSelectedMeal] = useState<'Lunch' | 'Dinner'>('Lunch');
 
   const fetchStatus = async () => {
@@ -60,15 +60,15 @@ export default function TokenScreen() {
   const isScanTimeForSelected = () => {
     const hour = new Date().getHours();
     if (selectedMeal === 'Lunch') {
-      return hour >= 13 && hour < 15; 
+      return hour >= 13 && hour < 15;
     } else {
-      return hour >= 21 && hour < 23; 
+      return hour >= 21 && hour < 23;
     }
   };
 
   const renderContent = () => {
     if (loading) {
-      return <ActivityIndicator size="large" color="#1F2937" style={{marginTop: 50}} />;
+      return <ActivityIndicator size="large" color="#1F2937" style={{ marginTop: 50 }} />;
     }
 
     const token = activeTokens.find(t => t.mealType === selectedMeal);
@@ -88,16 +88,16 @@ export default function TokenScreen() {
     }
 
     if (token.status === 'Used') {
-        return (
-          <View style={styles.centerBox}>
-            <Ionicons name="checkmark-circle-outline" size={80} color="#10B981" />
-            <Text style={[styles.noTokenText, {color: '#10B981'}]}>Already Eaten</Text>
-            <Text style={styles.subText}>
-              You have successfully consumed your {selectedMeal}.
-            </Text>
-            <Text style={styles.tokenIdText}>ID: {token.tokenID}</Text>
-          </View>
-        );
+      return (
+        <View style={styles.centerBox}>
+          <Ionicons name="checkmark-circle-outline" size={80} color="#10B981" />
+          <Text style={[styles.noTokenText, { color: '#10B981' }]}>Already Eaten</Text>
+          <Text style={styles.subText}>
+            You have successfully consumed your {selectedMeal}.
+          </Text>
+          <Text style={styles.tokenIdText}>ID: {token.tokenID}</Text>
+        </View>
+      );
     }
 
     if (!isTime) {
@@ -109,7 +109,7 @@ export default function TokenScreen() {
           <Text style={styles.subText}>
             {selectedMeal} QR code will be available between:
           </Text>
-          <Text style={[styles.subText, {fontWeight:'bold', marginTop:5, color:'#333'}]}>{timeMsg}</Text>
+          <Text style={[styles.subText, { fontWeight: 'bold', marginTop: 5, color: '#333' }]}>{timeMsg}</Text>
           <Text style={styles.tokenIdText}>Token ID: {token.tokenID}</Text>
         </View>
       );
@@ -120,7 +120,7 @@ export default function TokenScreen() {
         <Text style={styles.qrTitle}>{selectedMeal} QR Code</Text>
         <View style={styles.qrBorder}>
           <QRCode
-            value={token.tokenID} 
+            value={token.tokenID}
             size={220}
             color="black"
             backgroundColor="white"
@@ -139,7 +139,7 @@ export default function TokenScreen() {
     <View style={styles.mainContainer}>
       <Text style={styles.headerTitle}>My Tokens</Text>
 
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchStatus(); }} />}
       >
@@ -148,104 +148,35 @@ export default function TokenScreen() {
 
       <View style={styles.bottomFloatingContainer}>
         <View style={styles.toggleContainer}>
-            <TouchableOpacity 
-                style={[styles.toggleBtn, selectedMeal === 'Lunch' && styles.activeToggleBtn]}
-                onPress={() => setSelectedMeal('Lunch')}
-            >
-                <Text style={[styles.toggleText, selectedMeal === 'Lunch' && styles.activeToggleText]}>Lunch</Text>
-            </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.toggleBtn, selectedMeal === 'Lunch' && styles.activeToggleBtn]}
+            onPress={() => setSelectedMeal('Lunch')}
+          >
+            <Text style={[styles.toggleText, selectedMeal === 'Lunch' && styles.activeToggleText]}>Lunch</Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity 
-                style={[styles.toggleBtn, selectedMeal === 'Dinner' && styles.activeToggleBtn]}
-                onPress={() => setSelectedMeal('Dinner')}
-            >
-                <Text style={[styles.toggleText, selectedMeal === 'Dinner' && styles.activeToggleText]}>Dinner</Text>
-            </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.toggleBtn, selectedMeal === 'Dinner' && styles.activeToggleBtn]}
+            onPress={() => setSelectedMeal('Dinner')}
+          >
+            <Text style={[styles.toggleText, selectedMeal === 'Dinner' && styles.activeToggleText]}>Dinner</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
     </View>
-=======
-import React, { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, Text, Image } from 'react-native';
-import { ThemedView } from '@/components/themed-view';
-import { ThemedText } from '@/components/themed-text';
-
-export default function TokenScreen() {
-  const [selected, setSelected] = useState<'dinner' | 'lunch'>('dinner');
-
-  const renderTokenContent = () => {
-    if (selected === 'dinner') {
-      return (
-        <View style={styles.qrContainer}>
-          <ThemedText type="subtitle" style={{color:"black", fontSize:25, top:-20}}>Todays Available Token</ThemedText>
-          <Image
-            source={require('../../assets/images/qrcode.png')}
-            style={styles.qrImage}
-            resizeMode="contain"
-          />
-          <Text style={{
-            padding:5, paddingHorizontal:30, fontSize:20, backgroundColor:"#D6F4ED", margin:10, borderRadius:12, fontWeight:600}}>
-            Token ID: 2104090-D-123456</Text>
-        </View>
-      );
-    } else {
-      return (
-        <View style={styles.qrContainer}>
-          <ThemedText type="subtitle" style={{color:"black", fontSize:25, top:-20}}>Todays Available Token</ThemedText>
-          <Image
-            source={require('../../assets/images/qrcodeL.png')}
-            style={styles.qrImage}
-            resizeMode="contain"
-          />
-          <Text style={{
-            padding:5, paddingHorizontal:30, fontSize:20, backgroundColor:"#D6F4ED", margin:10, borderRadius:12, fontWeight:600}}>
-            Token ID: 2104090-D-921212</Text>
-        </View>
-      );
-    }
-  };
-
-  return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.hallName}>Muktijoddha Hall</ThemedText>
-      {renderTokenContent()}
-      <View style={styles.selectorContainer}>
-        <TouchableOpacity
-          style={[styles.selectorButton, selected === 'dinner' && styles.selectorButtonActive]}
-          onPress={() => setSelected('dinner')}
-        >
-          <Text style={[styles.selectorText, selected === 'dinner' && styles.selectorTextActive]}>
-            Dinner Token
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.selectorButton, selected === 'lunch' && styles.selectorButtonActive]}
-          onPress={() => setSelected('lunch')}
-        >
-          <Text style={[styles.selectorText, selected === 'lunch' && styles.selectorTextActive]}>
-            Lunch Token
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-
-    </ThemedView>
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   );
 }
 
 const styles = StyleSheet.create({
-<<<<<<< HEAD
   mainContainer: { flex: 1, backgroundColor: '#f7f8fa', paddingTop: 60 },
   headerTitle: { fontSize: 24, fontWeight: 'bold', color: '#333', marginBottom: 20, textAlign: 'center' },
-  
+
   scrollContent: { flexGrow: 1, paddingHorizontal: 20, paddingBottom: 120, alignItems: 'center' },
 
   bottomFloatingContainer: {
     position: 'absolute',
-    bottom: 40, 
+    bottom: 40,
     left: 0,
     right: 0,
     alignItems: 'center',
@@ -253,12 +184,12 @@ const styles = StyleSheet.create({
   },
   toggleContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff', 
+    backgroundColor: '#fff',
     borderRadius: 30,
     padding: 5,
     width: '85%',
-    elevation: 5, 
-    shadowColor: '#000', 
+    elevation: 5,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -282,126 +213,65 @@ const styles = StyleSheet.create({
   },
 
   centerBox: {
-     alignItems: 'center', 
-     justifyContent: 'center', 
-     marginTop: 50, 
-     width: '100%'
-     },
-  noTokenText: { 
-    fontSize: 20, 
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 50,
+    width: '100%'
+  },
+  noTokenText: {
+    fontSize: 20,
     fontWeight: 'bold',
-     color: '#555', 
-     marginTop: 15 
-    },
-  waitText: { fontSize: 20, 
-    fontWeight: 'bold', 
-    color: '#F59E0B', 
-    marginTop: 15 
+    color: '#555',
+    marginTop: 15
   },
-  subText: { 
-    color: '#888', 
-    marginTop: 5, 
-    textAlign: 'center', 
-    paddingHorizontal: 20, 
-    lineHeight: 22 
+  waitText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#F59E0B',
+    marginTop: 15
   },
-  tokenIdText: { 
-    marginTop: 20, 
-    fontWeight: 'bold', 
-    color: '#333', 
-    paddingVertical: 10, 
-    paddingHorizontal: 20, 
-    backgroundColor: '#eee', 
-    borderRadius: 8, 
-    overflow: 'hidden' 
+  subText: {
+    color: '#888',
+    marginTop: 5,
+    textAlign: 'center',
+    paddingHorizontal: 20,
+    lineHeight: 22
+  },
+  tokenIdText: {
+    marginTop: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: '#eee',
+    borderRadius: 8,
+    overflow: 'hidden'
   },
 
-  qrContainer: { alignItems: 'center', 
-    width: '100%', 
-    marginTop: 20 
+  qrContainer: {
+    alignItems: 'center',
+    width: '100%',
+    marginTop: 20
   },
-  qrTitle: { 
-    fontSize: 18, 
-    fontWeight: '600', 
-    color: '#1F2937', 
-    marginBottom: 20, 
-    textTransform: 'uppercase' 
+  qrTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 20,
+    textTransform: 'uppercase'
   },
   qrBorder: { padding: 15, backgroundColor: '#fff', borderRadius: 20, elevation: 5, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 10 },
   tokenInfoBox: { marginTop: 30, alignItems: 'center' },
   tokenText: { fontSize: 22, fontWeight: 'bold', color: '#333', letterSpacing: 1 },
   activeStatus: {
-     color: '#10B981', 
-    fontWeight: 'bold', 
+    color: '#10B981',
+    fontWeight: 'bold',
     marginTop: 5,
-     fontSize: 14 
-    },
-  warningText: { 
-    marginTop: 20, 
-    color: '#999', 
-    fontSize: 12 }
+    fontSize: 14
+  },
+  warningText: {
+    marginTop: 20,
+    color: '#999',
+    fontSize: 12
+  }
 });
-=======
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#f7f8fa', 
-  },
-  hallName: {
-    textAlign: 'center',
-    marginVertical: 20,
-    marginTop:50,
-    color:"black"
-  },
-  selectorContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginVertical: 16,
-  },
-  selectorButton: {
-    flex: 1,
-    paddingVertical: 12,
-    marginHorizontal: 8,
-    borderRadius: 24,
-    backgroundColor: '#ffffff', // inactive
-    alignItems: 'center',
-  },
-  selectorButtonActive: {
-    backgroundColor: '#b09160', // your active color (brown-ish)
-  },
-  selectorText: {
-    fontSize: 16,
-    color: '#555',
-  },
-  selectorTextActive: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  qrContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    bottom: -50
-  },
-  qrImage: {
-    width: 300,
-    height: 300,
-    backgroundColor: '#eaf0fc', // placeholder
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    height: 60,
-    borderTopWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#fff',
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  navItemActive: {
-    backgroundColor: '#e0e0e0',
-  },
-});
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416

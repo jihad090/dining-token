@@ -1,20 +1,10 @@
-<<<<<<< HEAD
-
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons'; 
+import Ionicons from '@expo/vector-icons/Ionicons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { router, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '@/constants/api';
-=======
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons'; 
-import AntDesign from '@expo/vector-icons/AntDesign';
-import { router } from 'expo-router';
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
 
 interface MealStatus {
   totalMealsToday: number;
@@ -23,29 +13,27 @@ interface MealStatus {
 }
 
 interface ScanRecord {
-  id: string; 
+  id: string;
   meal: 'Lunch' | 'Dinner';
   date: string;
   isSuccessful: boolean;
-  scanTime: string; 
+  scanTime: string;
 }
 
 const HALL_TIMINGS = {
-  LUNCH_START: 16, 
-  DINNER_START: 20, 
+  LUNCH_START: 13,
+  DINNER_START: 20,
 };
 
-<<<<<<< HEAD
-
 const INITIAL_STATUS: MealStatus = {
-  totalMealsToday: 180, 
+  totalMealsToday: 180,
   mealsEaten: 0,
-  nextFeastAnnouncement: 'Monthly special dinner on 20 Nov 2025!', 
+  nextFeastAnnouncement: 'Monthly special dinner on 20 Nov 2025!',
 };
 
 const fetchDiningBoyData = async (): Promise<{ status: MealStatus, history: ScanRecord[] }> => {
   try {
-    
+
     const token = await AsyncStorage.getItem('userToken');
     if (!token) {
       console.log("No token found in storage");
@@ -61,32 +49,29 @@ const fetchDiningBoyData = async (): Promise<{ status: MealStatus, history: Scan
       },
     });
 
-    // 3. Check for specific HTTP errors
     if (!response.ok) {
-        const text = await response.text();
-        console.error(`API Error: ${response.status} - ${text}`);
-        throw new Error(`Server returned ${response.status}`);
+      const text = await response.text();
+      console.error(`API Error: ${response.status} - ${text}`);
+      throw new Error(`Server returned ${response.status}`);
     }
 
     const data = await response.json();
-    
-    // 4. Map Backend Data to UI
-    // Backend returns: { history: [{ tokenID, mealType, scannedAt, ... }], count: number }
+
     const mappedHistory: ScanRecord[] = data.history.map((item: any) => {
-        const dateObj = new Date(item.scannedAt);
-        return {
-            id: item.tokenID,
-            meal: item.mealType,
-            date: dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-            isSuccessful: true, // History endpoint only returns successful scans
-            scanTime: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        };
+      const dateObj = new Date(item.scannedAt);
+      return {
+        id: item.tokenID,
+        meal: item.mealType,
+        date: dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+        isSuccessful: true, // History endpoint only returns successful scans
+        scanTime: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
     });
 
     return {
       status: {
         ...INITIAL_STATUS,
-        mealsEaten: data.count, 
+        mealsEaten: data.count,
       },
       history: mappedHistory,
     };
@@ -99,37 +84,6 @@ const fetchDiningBoyData = async (): Promise<{ status: MealStatus, history: Scan
 
 export default function DiningBoyDashboard() {
   const [mealStatus, setMealStatus] = useState<MealStatus>(INITIAL_STATUS);
-=======
-const mockScanHistory: ScanRecord[] = [
-  { id: '2104090-L-121212', meal: 'Lunch', date: '10 Nov 2025', isSuccessful: true, scanTime: '13:05' },
-  { id: '2104091-D-121213', meal: 'Dinner', date: '10 Nov 2025', isSuccessful: true, scanTime: '20:15' },
-  { id: '2104092-L-121214', meal: 'Lunch', date: '09 Nov 2025', isSuccessful: false, scanTime: '12:45' },
-];
-
-
-const fetchDiningBoyData = async (): Promise<{ status: MealStatus, history: ScanRecord[] }> => {
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
-  const total = 180;
-  const mealsEatenCount = mockScanHistory.filter(r => r.isSuccessful).length;
-
-  return {
-    status: {
-      totalMealsToday: total,
-      mealsEaten: mealsEatenCount,
-      nextFeastAnnouncement: 'Monthly special dinner on 20 Nov 2025!',
-    },
-    history: mockScanHistory,
-  };
-};
-
-export default function DiningBoyDashboard() {
-  const [mealStatus, setMealStatus] = useState<MealStatus>({
-    totalMealsToday: 0,
-    mealsEaten: 0,
-    nextFeastAnnouncement: null,
-  });
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   const [scanHistory, setScanHistory] = useState<ScanRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -161,7 +115,6 @@ export default function DiningBoyDashboard() {
   const hoursUntilNextMeal = Math.floor(timeDifferenceMs / (1000 * 60 * 60));
   const minutesUntilNextMeal = Math.ceil((timeDifferenceMs % (1000 * 60 * 60)) / (1000 * 60));
 
-<<<<<<< HEAD
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
@@ -178,21 +131,11 @@ export default function DiningBoyDashboard() {
       return () => { isActive = false; };
     }, [])
   );
-=======
-  useEffect(() => {
-    setLoading(true);
-    fetchDiningBoyData().then(data => {
-      setMealStatus(data.status);
-      setScanHistory(data.history);
-      setLoading(false);
-    });
-  }, []);
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
 
   const handleViewToken = (record: ScanRecord) => {
     Alert.alert(
       `${record.meal} Token Scan Details`,
-      `Token ID (QR Value): ${record.id}\nStatus: ${record.isSuccessful ? 'Successful' : 'Failed'}\nScan Time: ${record.scanTime }`,
+      `Token ID (QR Value): ${record.id}\nStatus: ${record.isSuccessful ? 'Successful' : 'Failed'}\nScan Time: ${record.scanTime}`,
       [{ text: 'OK', style: 'cancel' }]
     );
   };
@@ -201,104 +144,91 @@ export default function DiningBoyDashboard() {
     return (
       <View style={[styles.container, styles.loadingContainer]}>
         <ActivityIndicator size="large" color="#007AFF" />
-<<<<<<< HEAD
         <Text style={styles.loadingText}>Loading history...</Text>
-=======
-        <Text style={styles.loadingText}>Loading hall management info...</Text>
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
       </View>
     );
   }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   const formatCountdown = (h: number, m: number) => {
-      if (h > 0) return `${h} hr ${m} min`;
-      if (m > 0) return `${m} minutes`;
-      return 'Starting Now!';
+    if (h > 0) return `${h} hr ${m} min`;
+    if (m > 0) return `${m} minutes`;
+    return 'Starting Now!';
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.hallName}>Muktijoddha Hall</Text>
       <Text style={styles.dashboardTitle}>Dining Boy Dashboard</Text>
-      
+
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
         <View style={styles.timelineCard}>
-            <View style={styles.timelineRow}>
-                <Ionicons name="timer-outline" size={24} color="#6366F1" />
-                <View style={styles.timelineTextContainer}>
-                    <Text style={styles.timelineTitle}>Next Service: {nextMealName}</Text>
-                    <Text style={styles.timelineSubtitle}>
-                        Starts in <Text style={{fontWeight: '700', color: '#6366F1'}}>{formatCountdown(hoursUntilNextMeal, minutesUntilNextMeal)}</Text>
-                    </Text>
-                </View>
-                <Text style={styles.currentMealText}>
-                    {currentMealName !== 'None' ? currentMealName : 'Closed'}
-                </Text>
+          <View style={styles.timelineRow}>
+            <Ionicons name="timer-outline" size={24} color="#6366F1" />
+            <View style={styles.timelineTextContainer}>
+              <Text style={styles.timelineTitle}>Next Service: {nextMealName}</Text>
+              <Text style={styles.timelineSubtitle}>
+                Starts in <Text style={{ fontWeight: '700', color: '#6366F1' }}>{formatCountdown(hoursUntilNextMeal, minutesUntilNextMeal)}</Text>
+              </Text>
             </View>
+            <Text style={styles.currentMealText}>
+              {currentMealName !== 'None' ? currentMealName : 'Closed'}
+            </Text>
+          </View>
         </View>
 
         <View style={styles.statusCard}>
-            <View style={styles.cardHeader}>
-                <Text style={styles.cardHeaderText}>
-                    <Ionicons name="restaurant-outline" size={18} color="#10B981" /> Hall Today's Status
-                </Text>
-            </View>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardHeaderText}>
+              <Ionicons name="restaurant-outline" size={18} color="#10B981" /> Hall Today's Status
+            </Text>
+          </View>
 
-            <View style={styles.statsRow}>
-                <MealStat label="Total Tokens" value={mealStatus.totalMealsToday} width={'33%'} />
-<<<<<<< HEAD
-                <MealStat label="Successfull Scan" value={mealStatus.mealsEaten} width={'33%'} />
-                <MealStat label="Invalid Scan" value={0} width={'33%'} highlight={true} />
-=======
-                <MealStat label="Successfull Scan" value={mealStatus.totalMealsToday-10} width={'33%'} />
-                <MealStat label="Invalid Scan" value={mealStatus.mealsEaten} width={'33%'} highlight={true} />
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
-            </View>
+          <View style={styles.statsRow}>
+            <MealStat label="Total Tokens" value={mealStatus.totalMealsToday} width={'33%'} />
+            <MealStat label="Successfull Scan" value={mealStatus.mealsEaten} width={'33%'} />
+            <MealStat label="Invalid Scan" value={0} width={'33%'} highlight={true} />
+          </View>
 
-            {tokenWarning && (
-                <View style={styles.warningBox}>
-                    <Text style={styles.warningText}>
-                        ⚠️ Token Pool Low! **{tokensRemaining}** tokens left for the day.
-                    </Text>
-                </View>
-            )}
+          {tokenWarning && (
+            <View style={styles.warningBox}>
+              <Text style={styles.warningText}>
+                ⚠️ Token Pool Low! **{tokensRemaining}** tokens left for the day.
+              </Text>
+            </View>
+          )}
         </View>
 
         {mealStatus.nextFeastAnnouncement && (
-            <TouchableOpacity style={styles.announcementCard}>
-                <View style={styles.announcementContent}>
-                    <Ionicons name="gift-outline" size={24} color="#C026D3" style={styles.announcementIcon} />
-                    <Text style={styles.announcementText}>
-                        {mealStatus.nextFeastAnnouncement}
-                    </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color="#C026D3" />
-            </TouchableOpacity>
+          <TouchableOpacity style={styles.announcementCard}>
+            <View style={styles.announcementContent}>
+              <Ionicons name="gift-outline" size={24} color="#C026D3" style={styles.announcementIcon} />
+              <Text style={styles.announcementText}>
+                {mealStatus.nextFeastAnnouncement}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#C026D3" />
+          </TouchableOpacity>
         )}
-        
+
         <Text style={styles.sectionHeader}>Today's Recent Scans ({scanHistory.length})</Text>
-        
+
         {scanHistory.map((record) => (
-            <ScanHistoryItem
-                key={record.id}
-                record={record}
-                onPress={handleViewToken}
-            />
+          <ScanHistoryItem
+            key={record.id}
+            record={record}
+            onPress={handleViewToken}
+          />
         ))}
 
         {scanHistory.length === 0 && (
-            <Text style={styles.noHistoryText}>No tokens have been scanned today yet.</Text>
+          <Text style={styles.noHistoryText}>No tokens have been scanned today yet.</Text>
         )}
 
       </ScrollView>
 
-      <TouchableOpacity 
-        onPress={() => router.push('/login')} 
+      <TouchableOpacity
+        onPress={() => router.push('/login')}
         style={styles.logout}
       >
         <AntDesign name="logout" size={24} color="black" />
@@ -317,27 +247,27 @@ const MealStat = ({ label, value, highlight = false, width = '50%' }: { label: s
 );
 
 const ScanHistoryItem = ({ record, onPress }: { record: ScanRecord, onPress: (record: ScanRecord) => void }) => {
-    const color = record.isSuccessful ? "#10B981" : "#EF4444"; 
-    const iconName = record.isSuccessful ? "checkmark-circle-outline" : "close-circle-outline";
-    const statusText = record.isSuccessful 
-        ? `Successful at ${record.scanTime}` 
-        : 'Scan Failed/Token Invalid';
+  const color = record.isSuccessful ? "#10B981" : "#EF4444";
+  const iconName = record.isSuccessful ? "checkmark-circle-outline" : "close-circle-outline";
+  const statusText = record.isSuccessful
+    ? `Successful at ${record.scanTime}`
+    : 'Scan Failed/Token Invalid';
 
-    return (
-        <TouchableOpacity 
-            onPress={() => onPress(record)} 
-            style={[styles.historyItemButton, { borderLeftColor: color }]}
-        >
-            <View style={styles.historyItemContent}>
-                <Ionicons name={iconName as any} size={24} color={color} style={styles.historyIcon} />
-                <View>
-                    <Text style={[styles.historyItemLabel]}>{`${record.date} (${record.meal} Token)`}</Text>
-                    <Text style={[styles.historyItemSubtext, {color}]}>{statusText}</Text>
-                </View>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#6B7280" />
-        </TouchableOpacity>
-    );
+  return (
+    <TouchableOpacity
+      onPress={() => onPress(record)}
+      style={[styles.historyItemButton, { borderLeftColor: color }]}
+    >
+      <View style={styles.historyItemContent}>
+        <Ionicons name={iconName as any} size={24} color={color} style={styles.historyIcon} />
+        <View>
+          <Text style={[styles.historyItemLabel]}>{`${record.date} (${record.meal} Token)`}</Text>
+          <Text style={[styles.historyItemSubtext, { color }]}>{statusText}</Text>
+        </View>
+      </View>
+      <Ionicons name="chevron-forward" size={20} color="#6B7280" />
+    </TouchableOpacity>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -347,7 +277,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   scrollContent: {
-    paddingBottom: 20, 
+    paddingBottom: 20,
   },
   loadingContainer: {
     justifyContent: 'center',
@@ -379,10 +309,6 @@ const styles = StyleSheet.create({
     marginTop: 15,
     marginBottom: 10,
   },
-<<<<<<< HEAD
-=======
-  // 1. Timeline Card Styles
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   timelineCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -419,10 +345,6 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRadius: 6,
   },
-<<<<<<< HEAD
-=======
-  // 2. Status Card Styles
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   statusCard: {
     backgroundColor: '#ffffff',
     borderRadius: 12,
@@ -473,10 +395,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
-<<<<<<< HEAD
-=======
-  // 3. Announcement Card Styles
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   announcementCard: {
     backgroundColor: '#F3E8FF',
     padding: 15,
@@ -499,10 +417,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#C026D3',
   },
-<<<<<<< HEAD
-=======
-  // 4. Scan History Item Styles
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   historyItemButton: {
     backgroundColor: '#fff',
     padding: 15,
@@ -540,11 +454,6 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     fontStyle: 'italic',
   },
-<<<<<<< HEAD
-
-=======
-  // Logout Styles
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
   logout: {
     position: 'absolute',
     top: 50,

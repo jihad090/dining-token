@@ -116,7 +116,7 @@ export default function QrScannerScreen() {
     data: string;
     type: string;
   }) => {
-    if (!isScanning || isProcessing) return; 
+    if (!isScanning || isProcessing) return;
 
     setIsScanning(false);
     setIsProcessing(true);
@@ -165,25 +165,22 @@ export default function QrScannerScreen() {
     lastScanResult.status === "success"
       ? "#10B981"
       : lastScanResult.status === "failure"
-      ? "#EF4444"
-      : "#6B7280";
+        ? "#EF4444"
+        : "#6B7280";
 
   const feedbackBackgroundColor =
     lastScanResult.status === "success"
       ? "#D1FAE5"
       : lastScanResult.status === "failure"
-      ? "#FEE2E2"
-      : "#E5E7EB";
+        ? "#FEE2E2"
+        : "#E5E7EB";
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View>
         <Text style={styles.hallName}>Muktijoddha Hall</Text>
-<<<<<<< HEAD
-=======
-        {/* <Text style={styles.subtitle}>Dining Token QR Scanner</Text> */}
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
+
       </View>
 
       <View style={styles.scannerArea}>
@@ -221,8 +218,8 @@ export default function QrScannerScreen() {
               lastScanResult.status === "success"
                 ? "checkmark-circle"
                 : lastScanResult.status === "failure"
-                ? "close-circle"
-                : "scan-outline"
+                  ? "close-circle"
+                  : "scan-outline"
             }
             size={35}
             color={feedbackColor}
@@ -230,7 +227,7 @@ export default function QrScannerScreen() {
           <Text
             style={[
               styles.feedbackText,
-              { color: feedbackColor},
+              { color: feedbackColor },
             ]}
           >
             {lastScanResult.message}
@@ -284,7 +281,7 @@ const styles = StyleSheet.create({
   hallName: {
     textAlign: "center",
     fontSize: 28,
-    paddingBottom:30,
+    paddingBottom: 30,
     fontWeight: "bold",
     color: "#1F2937",
   },
@@ -372,10 +369,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     marginBottom: 20,
     flexDirection: "row",
-<<<<<<< HEAD
-=======
-    // removed 'gap' for better RN compatibility
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
+
   },
   scanButtonText: {
     color: "#fff",

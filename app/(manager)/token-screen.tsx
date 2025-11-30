@@ -10,28 +10,30 @@ export default function TokenScreen() {
     if (selected === 'dinner') {
       return (
         <View style={styles.qrContainer}>
-          <ThemedText type="subtitle" style={{color:"black", fontSize:25, top:-20}}>Todays Available Token</ThemedText>
+          <ThemedText type="subtitle" style={{ color: "black", fontSize: 25, top: -20 }}>Todays Available Token</ThemedText>
           <Image
             source={require('../../assets/images/qrcode.png')}
             style={styles.qrImage}
             resizeMode="contain"
           />
           <Text style={{
-            padding:5, paddingHorizontal:30, fontSize:20, backgroundColor:"#D6F4ED", margin:10, borderRadius:12, fontWeight:600}}>
+            padding: 5, paddingHorizontal: 30, fontSize: 20, backgroundColor: "#D6F4ED", margin: 10, borderRadius: 12, fontWeight: 600
+          }}>
             Token ID: 2104090-D-123456</Text>
         </View>
       );
     } else {
       return (
         <View style={styles.qrContainer}>
-          <ThemedText type="subtitle" style={{color:"black", fontSize:25, top:-20}}>Todays Available Token</ThemedText>
+          <ThemedText type="subtitle" style={{ color: "black", fontSize: 25, top: -20 }}>Todays Available Token</ThemedText>
           <Image
             source={require('../../assets/images/qrcodeL.png')}
             style={styles.qrImage}
             resizeMode="contain"
           />
           <Text style={{
-            padding:5, paddingHorizontal:30, fontSize:20, backgroundColor:"#D6F4ED", margin:10, borderRadius:12, fontWeight:600}}>
+            padding: 5, paddingHorizontal: 30, fontSize: 20, backgroundColor: "#D6F4ED", margin: 10, borderRadius: 12, fontWeight: 600
+          }}>
             Token ID: 2104090-D-921212</Text>
         </View>
       );
@@ -71,17 +73,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-<<<<<<< HEAD
-    backgroundColor: '#f7f8fa', 
-=======
-    backgroundColor: '#f7f8fa', // or your theme background
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
+    backgroundColor: '#f7f8fa',
   },
   hallName: {
     textAlign: 'center',
     marginVertical: 20,
-    marginTop:50,
-    color:"black"
+    marginTop: 50,
+    color: "black"
   },
   selectorContainer: {
     flexDirection: 'row',
@@ -93,19 +91,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     marginHorizontal: 8,
     borderRadius: 24,
-<<<<<<< HEAD
-    backgroundColor: '#ffffff', 
+    backgroundColor: '#ffffff',
     alignItems: 'center',
   },
   selectorButtonActive: {
-    backgroundColor: '#b09160', 
-=======
-    backgroundColor: '#ffffff', // inactive
-    alignItems: 'center',
-  },
-  selectorButtonActive: {
-    backgroundColor: '#b09160', // your active color (brown-ish)
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
+    backgroundColor: '#b09160',
   },
   selectorText: {
     fontSize: 16,
@@ -124,11 +114,7 @@ const styles = StyleSheet.create({
   qrImage: {
     width: 300,
     height: 300,
-<<<<<<< HEAD
-    backgroundColor: '#eaf0fc', 
-=======
-    backgroundColor: '#eaf0fc', // placeholder
->>>>>>> 6c0acbe09b12f47db99b7c37c2c9a3ef819d5416
+    backgroundColor: '#eaf0fc',
   },
   bottomNav: {
     flexDirection: 'row',
