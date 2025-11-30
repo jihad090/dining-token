@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   StyleSheet, View, Text, TouchableOpacity, ScrollView,
@@ -51,7 +52,6 @@ const fetchDinerData = async (): Promise<{ status: MealStatus; tokens: TokenStat
 };
 
 export default function DinerDashboard() {
-  // --- Existing States ---
   const [mealStatus, setMealStatus] = useState<MealStatus>({
     totalMealsToday: 0,
     mealsEaten: 0,
@@ -63,14 +63,14 @@ export default function DinerDashboard() {
     dinnerScanned: false,
   });
 
-  // History State
   const [historyList, setHistoryList] = useState<HistoryItem[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  
+  const [upcomingTokensCount, setUpcomingTokensCount] = useState<number>(0);
 
-  // --- Order Form States ---
   const [modalVisible, setModalVisible] = useState(false);
   const [packageType, setPackageType] = useState<'15_days' | '30_days' | 'rest_month'>('15_days');
   const [bkashNumber, setBkashNumber] = useState('');
@@ -79,15 +79,13 @@ export default function DinerDashboard() {
   const [calculatedDays, setCalculatedDays] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
-  const MEAL_RATE_PER_DAY = 70;
+  const MEAL_RATE_PER_DAY = 40;
 
-  // --- Derived Logic ---
   const tokensRemaining = mealStatus.totalMealsToday - mealStatus.mealsEaten;
   const tokenWarning = mealStatus.mealsEaten > mealStatus.totalMealsToday * 0.8;
   const now = new Date();
   const currentHour = now.getHours();
 
-  // Logic to determine the next meal and time (using the more detailed logic from one branch)
   let nextMealTime: Date;
   let nextMealName: 'Lunch' | 'Dinner';
   
@@ -121,14 +119,29 @@ export default function DinerDashboard() {
       setMealStatus(data.status);
 
       const token = await AsyncStorage.getItem('userToken');
-      const response = await fetch(`${API_BASE_URL}/dining-token/history`, {
+      
+      // 1. Fetch History
+      const historyResponse = await fetch(`${API_BASE_URL}/dining-token/history`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const historyData = await response.json();
+      const historyData = await historyResponse.json();
 
-      if (response.ok) {
+      if (historyResponse.ok) {
         setHistoryList(historyData);
       }
+      
+      // 2. Fetch Upcoming Tokens 
+      const upcomingResponse = await fetch(`${API_BASE_URL}/dining-token/upcoming`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const upcomingData = await upcomingResponse.json();
+      
+      if (upcomingResponse.ok && Array.isArray(upcomingData)) {
+          setUpcomingTokensCount(upcomingData.length); 
+      } else {
+          setUpcomingTokensCount(0);
+      }
+      
     } catch (e) {
       console.error(e);
       
@@ -163,7 +176,36 @@ export default function DinerDashboard() {
     setAmount(days * MEAL_RATE_PER_DAY);
   }, [packageType]);
 
-  // --- 3. Submit Order ---
+  // --- NEW HANDLER FOR FAB CLICK ---
+  const handleOrderPress = () => {
+    const isOrderBlocked = upcomingTokensCount > 0;
+    
+    if (isOrderBlocked) {
+      const daysCovered = Math.floor(upcomingTokensCount / 2);
+
+      const today = new Date();
+      const tokenExpirationDate = new Date(today);
+      tokenExpirationDate.setDate(today.getDate() + daysCovered); 
+      
+      const nextPurchaseDate = new Date(tokenExpirationDate);
+      nextPurchaseDate.setDate(tokenExpirationDate.getDate() - 1);
+
+      const nextPurchaseDateString = nextPurchaseDate.toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+      
+      Alert.alert(
+        "Purchase Restricted",
+        `You have tokens for the next ${daysCovered} days (${upcomingTokensCount} tokens).\n\nNew plan available starting ${nextPurchaseDateString}.`,
+        [{ text: "OK" }]
+      );
+    } else {
+      setModalVisible(true);
+    }
+  };
+  
   const handleSubmitOrder = async () => {
     if (!trxId.trim() || !bkashNumber.trim()) {
       Alert.alert("Missing Info", "Please enter Sender Number and Transaction ID");
@@ -195,7 +237,6 @@ export default function DinerDashboard() {
         setModalVisible(false);
         setTrxId('');
         setBkashNumber('');
-        // Reload data after successful purchase
         loadData();
       } else {
         Alert.alert("Error", data.message || "Failed to submit");
@@ -213,6 +254,9 @@ export default function DinerDashboard() {
       `Date: ${new Date(item.date).toDateString()}\nMeal: ${item.mealType}\nStatus: ${item.status}\nID: ${item.tokenID}\nScanned: ${item.scannedAt ? new Date(item.scannedAt).toLocaleTimeString() : 'N/A'}`
     );
   };
+  
+  
+
 
   if (loading && !refreshing) {
     return (
@@ -314,14 +358,13 @@ export default function DinerDashboard() {
 
       </ScrollView>
 
-      {/* Logout */}
       <TouchableOpacity onPress={()=>{router.push('/login')}} style={styles.logout}>
         <AntDesign name="logout" size={24} color="black" />
       </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.fab}>
+      
+      <TouchableOpacity onPress={handleOrderPress} style={styles.fab}>
         <Ionicons name="add-circle" size={30} color="#fff" />
-        <Text style={styles.fabText}>Order Next Token</Text>
+        <Text style={styles.fabText}>Order Next Plan</Text>
       </TouchableOpacity>
 
       <Modal animationType="slide" transparent={true} visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
