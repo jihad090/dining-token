@@ -12,10 +12,9 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { router } from 'expo-router';
+import { router,Stack } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '@/constants/api';
-
 type AuthorityTab = 'Dashboard' | 'HallInfo' | 'Managers' | 'Halls';
 
 interface MonthlyEarning {
@@ -352,11 +351,30 @@ export default function HallAuthorityDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<AuthorityTab>('Dashboard');
 
-  // Search States
   const [searchEmail, setSearchEmail] = useState('');
   const [foundStudent, setFoundStudent] = useState<any>(null);
   const [searching, setSearching] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
+
+
+  const fetchProvostInfo = async () => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      const response = await fetch(`${API_BASE_URL}/users/profile`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      
+      if (response.ok && data.hallName) {
+        setHallInfo(prev => ({
+          ...prev,
+          name: data.hallName 
+        }));
+      }
+    } catch (e) {
+      console.error("Failed to fetch provost info", e);
+    }
+  };
 
   const fetchManagers = async () => {
     try {
@@ -377,6 +395,7 @@ export default function HallAuthorityDashboard() {
     const init = async () => {
       setLoading(true);
       await fetchManagers();
+      await fetchProvostInfo();
       setTimeout(() => setLoading(false), 800);
     };
     init();
@@ -481,7 +500,8 @@ export default function HallAuthorityDashboard() {
 
   if (loading) {
     return (
-      <View style={[styles.container, styles.loadingContainer]}>
+     <View style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }} />
         <ActivityIndicator size="large" color="#007AFF" />
         <Text style={styles.loadingText}>Loading Hall Authority Dashboard...</Text>
       </View>
@@ -565,9 +585,9 @@ export default function HallAuthorityDashboard() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.hallName}>University Hall Authority</Text>
+      <Text style={styles.hallName}>Hall Authority Dashboard</Text>
       <Text style={styles.dashboardTitle}>
-        Central Hall Control & Monitoring
+        {hallInfo.name} Control & Monitoring
       </Text>
 
       <View style={styles.tabBar}>
@@ -628,7 +648,6 @@ const styles = StyleSheet.create({
     marginTop: 15,
     marginBottom: 10,
   },
-  // Tab Bar
   tabBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
