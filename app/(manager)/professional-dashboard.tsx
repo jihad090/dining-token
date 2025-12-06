@@ -265,6 +265,33 @@ export default function ManagerProfessionalDashboard() {
 
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<ManagerTab>('Dashboard');
+    const [hallName, setHallName] = useState("Loading..."); 
+
+
+  
+useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const token = await AsyncStorage.getItem('userToken');
+        if (!token) return;
+
+        const response = await fetch(`${API_BASE_URL}/users/profile`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const data = await response.json();
+        if (response.ok && data.hallName) {
+          setHallName(data.hallName);
+        }
+      } catch (error) {
+        console.log("Error fetching hall name:", error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
+
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -385,7 +412,7 @@ export default function ManagerProfessionalDashboard() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.hallName}>Muktijoddha Hall</Text>
+      <Text style={styles.hallName}>{hallName} </Text>
       <Text style={styles.dashboardTitle}>Manager Dashboard</Text>
 
       <View style={styles.tabBar}>

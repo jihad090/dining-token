@@ -5,7 +5,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { router, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '@/constants/api';
-
+import io from 'socket.io-client';
 interface MealStatus {
   totalMealsToday: number;
   mealsEaten: number;
@@ -30,6 +30,11 @@ const INITIAL_STATUS: MealStatus = {
   mealsEaten: 0,
   nextFeastAnnouncement: 'Monthly special dinner on 20 Nov 2025!',
 };
+
+
+
+
+
 
 const fetchDiningBoyData = async (): Promise<{ status: MealStatus, history: ScanRecord[] }> => {
   try {
@@ -63,7 +68,7 @@ const fetchDiningBoyData = async (): Promise<{ status: MealStatus, history: Scan
         id: item.tokenID,
         meal: item.mealType,
         date: dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-        isSuccessful: true, // History endpoint only returns successful scans
+        isSuccessful: true, 
         scanTime: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
     });
@@ -115,22 +120,66 @@ export default function DiningBoyDashboard() {
   const hoursUntilNextMeal = Math.floor(timeDifferenceMs / (1000 * 60 * 60));
   const minutesUntilNextMeal = Math.ceil((timeDifferenceMs % (1000 * 60 * 60)) / (1000 * 60));
 
-  useFocusEffect(
+
+const handleLogout = async () => {
+    try {
+      await AsyncStorage.multiRemove(['token', 'accessToken', 'userToken']);
+      
+      setMealStatus(INITIAL_STATUS);
+      setScanHistory([]);
+
+      router.replace('/login');
+    } catch (error) {
+      console.error("Logout error:", error);
+      router.replace('/login');
+    }
+  };
+
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     let isActive = true;
+  //     setLoading(true);
+
+  //     fetchDiningBoyData().then((data) => {
+  //       if (isActive) {
+  //         setMealStatus(data.status);
+  //         setScanHistory(data.history);
+  //         setLoading(false);
+  //       }
+  //     });
+
+  //     return () => { isActive = false; };
+  //   }, [])
+  // );
+useFocusEffect(
     useCallback(() => {
       let isActive = true;
       setLoading(true);
 
-      fetchDiningBoyData().then((data) => {
+      const loadData = async () => {
+        const data = await fetchDiningBoyData();
+
         if (isActive) {
-          setMealStatus(data.status);
-          setScanHistory(data.history);
-          setLoading(false);
+          if (data === null) {
+            console.log("Session invalid, redirecting to login...");
+            handleLogout(); 
+          } else {
+            setMealStatus(data.status);
+            setScanHistory(data.history);
+            setLoading(false);
+          }
         }
-      });
+      };
+
+      loadData();
 
       return () => { isActive = false; };
     }, [])
   );
+
+
+
+
 
   const handleViewToken = (record: ScanRecord) => {
     Alert.alert(
@@ -228,7 +277,7 @@ export default function DiningBoyDashboard() {
       </ScrollView>
 
       <TouchableOpacity
-        onPress={() => router.push('/login')}
+        onPress={handleLogout}
         style={styles.logout}
       >
         <AntDesign name="logout" size={24} color="black" />
@@ -461,3 +510,4 @@ const styles = StyleSheet.create({
     padding: 5,
   },
 });
+

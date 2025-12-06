@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   StyleSheet, View, Text, TouchableOpacity, ScrollView,
@@ -58,7 +59,7 @@ export default function DinerDashboard() {
     nextFeastAnnouncement: null,
     personalWeeklyMealCount: 0,
   });
-  const [tokenStatus] = useState<TokenStatus>({
+  const [tokenStatus, setTokenStatus] = useState<TokenStatus>({
     lunchScanned: true,
     dinnerScanned: false,
   });
@@ -80,6 +81,20 @@ export default function DinerDashboard() {
   const [submitting, setSubmitting] = useState(false);
 
   const MEAL_RATE_PER_DAY = 40;
+
+  // --- 1. Secure Logout Function ---
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.multiRemove(['userToken', 'token', 'accessToken']); 
+      
+      setHistoryList([]);
+      
+      router.replace('/login');
+    } catch (error) {
+      console.error("Logout error:", error);
+      router.replace('/login');
+    }
+  };
 
   const tokensRemaining = mealStatus.totalMealsToday - mealStatus.mealsEaten;
   const tokenWarning = mealStatus.mealsEaten > mealStatus.totalMealsToday * 0.8;
@@ -115,15 +130,26 @@ export default function DinerDashboard() {
   const loadData = async () => {
     setLoadingHistory(true);
     try {
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) {
+        console.log("No token found, logging out...");
+        handleLogout();
+        return;
+      }
+
       const data = await fetchDinerData();
       setMealStatus(data.status);
+      setTokenStatus(data.tokens); 
 
-      const token = await AsyncStorage.getItem('userToken');
-      
-      // 1. Fetch History
       const historyResponse = await fetch(`${API_BASE_URL}/dining-token/history`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+
+      if (historyResponse.status === 401) {
+        handleLogout();
+        return;
+      }
+
       const historyData = await historyResponse.json();
 
       if (historyResponse.ok) {
@@ -144,17 +170,12 @@ export default function DinerDashboard() {
       
     } catch (e) {
       console.error(e);
-      
     } finally {
       setLoading(false);
       setLoadingHistory(false);
       setRefreshing(false);
     }
   };
-
-  useEffect(() => {
-    loadData();
-  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -176,7 +197,6 @@ export default function DinerDashboard() {
     setAmount(days * MEAL_RATE_PER_DAY);
   }, [packageType]);
 
-  // --- NEW HANDLER FOR FAB CLICK ---
   const handleOrderPress = () => {
     const isOrderBlocked = upcomingTokensCount > 0;
     
@@ -255,9 +275,6 @@ export default function DinerDashboard() {
     );
   };
   
-  
-
-
   if (loading && !refreshing) {
     return (
       <View style={[styles.container, styles.loadingContainer]}>
@@ -288,7 +305,6 @@ export default function DinerDashboard() {
                         <Text style={{fontWeight: '700', color: '#6366F1'}}>{formatCountdown(hoursUntilNextMeal, minutesUntilNextMeal)}</Text>
                     </Text>
                 </View>
-                {/* Simplified Active/Time Display */}
                 <Text style={styles.currentMealText}>{nextMealName} Service</Text>
             </View>
         </View>
@@ -358,7 +374,8 @@ export default function DinerDashboard() {
 
       </ScrollView>
 
-      <TouchableOpacity onPress={()=>{router.push('/login')}} style={styles.logout}>
+      {/* Logout Button Update */}
+      <TouchableOpacity onPress={handleLogout} style={styles.logout}>
         <AntDesign name="logout" size={24} color="black" />
       </TouchableOpacity>
       
@@ -470,7 +487,6 @@ const ActionButton = ({ label, subtext, onPress, color, disabled, icon }: { labe
   </TouchableOpacity>
 );
 
-// --- Styles ---
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F3F4F6', padding: 20 },
   scrollContent: { paddingBottom: 100 },

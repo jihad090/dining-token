@@ -286,49 +286,141 @@ const ManagersSection = ({
 };
 
 
+
 const HallsSection = ({
   halls,
   onAddHall,
 }: {
   halls: Hall[];
-  onAddHall: (h: Omit<Hall, 'id'>) => void;
+  onAddHall: (h: any) => void; 
 }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [address, setAddress] = useState('');
+  const [password, setPassword] = useState('');
   const [capacity, setCapacity] = useState('');
-  const [description, setDescription] = useState('');
+  const [loading, setLoading] = useState(false); 
 
-  const handleAddHall = () => {
-    // Mock Implementation for now
-    Alert.alert('Feature Pending', 'Add Hall API is not integrated yet.');
+  const handleAddHall = async () => {
+    if (!name || !email || !password || !capacity) {
+      Alert.alert('Missing Fields', 'Please fill all fields (Name, Email, Password, Capacity).');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      
+      const response = await fetch(`${API_BASE_URL}/halls`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: name,
+          email: email,
+          password: password,
+          capacity: Number(capacity),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert('Success', 'Hall and Admin created successfully!');
+        
+        setName('');
+        setEmail('');
+        setPassword('');
+        setCapacity('');
+
+        if (onAddHall && data.hall) {
+           onAddHall(data.hall);
+        }
+      } else {
+        Alert.alert('Error', data.message || 'Failed to create hall.');
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Network Error', 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <View style={styles.sectionContainer}>
-      <Text style={styles.sectionHeader}>Add New Hall</Text>
+      <Text style={styles.sectionHeader}>Add New Hall & Admin</Text>
 
       <View style={styles.assignmentCard}>
-        <TextInput style={styles.input} placeholder="Hall Name" value={name} onChangeText={setName} />
-        <TextInput style={styles.input} placeholder="Hall Email" value={email} onChangeText={setEmail} />
-        <TextInput style={styles.input} placeholder="Hall Address" value={address} onChangeText={setAddress} />
-        <TextInput style={styles.input} placeholder="Capacity" value={capacity} onChangeText={setCapacity} keyboardType="numeric" />
-        <TextInput style={[styles.input, { height: 80 }]} placeholder="Description / Notes" value={description} onChangeText={setDescription} multiline />
+        <TextInput 
+          style={styles.input} 
+          placeholder="Hall Name" 
+          value={name} 
+          onChangeText={setName} 
+        />
+        
+        <TextInput 
+          style={styles.input} 
+          placeholder="Admin Email" 
+          value={email} 
+          onChangeText={setEmail} 
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
 
-        <TouchableOpacity style={styles.assignButton} onPress={handleAddHall}>
-          <Ionicons name="business-outline" size={20} color="#fff" />
-          <Text style={styles.assignButtonText}>Add Hall</Text>
+        <TextInput 
+          style={styles.input} 
+          placeholder="Password" 
+          value={password} 
+          onChangeText={setPassword} 
+          secureTextEntry={true} 
+        />
+
+        <TextInput 
+          style={styles.input} 
+          placeholder="Capacity" 
+          value={capacity} 
+          onChangeText={setCapacity} 
+          keyboardType="numeric" 
+        />
+
+        <TouchableOpacity 
+            style={[styles.assignButton, loading && { opacity: 0.7 }]} 
+            onPress={handleAddHall}
+            disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <>
+                <Ionicons name="business-outline" size={20} color="#fff" />
+                <Text style={styles.assignButtonText}>Create Hall & Admin</Text>
+            </>
+          )}
         </TouchableOpacity>
       </View>
 
       <Text style={[styles.sectionHeader, { marginTop: 20 }]}>All Halls</Text>
       <ScrollView style={styles.scrollSection}>
-        <Text style={styles.noDataText}>No halls found.</Text>
+        {halls.length === 0 ? (
+            <Text style={styles.noDataText}>No halls found.</Text>
+        ) : (
+            halls.map((hall, index) => (
+                <View key={index} style={styles.diningBoyItem}>
+                    <View>
+                        <Text style={styles.diningBoyName}>{hall.name}</Text>
+                        <Text style={styles.diningBoyDate}>Capacity: {hall.capacity}</Text>
+                    </View>
+                    {/*In future here add hall history */}
+                </View>
+            ))
+        )}
       </ScrollView>
     </View>
   );
 };
-
 
 export default function HallAuthorityDashboard() {
   const [earnings, setEarnings] = useState<MonthlyEarning[]>([
