@@ -8,6 +8,7 @@ export default function RegisterScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [hallName, setHallName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
 
@@ -17,7 +18,7 @@ export default function RegisterScreen() {
   const handleSignUp = async () => {
     setError(null);
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !hallName) {
       setError('Please fill in all fields');
       return;
     }
@@ -38,6 +39,7 @@ export default function RegisterScreen() {
           name: name,
           email: email,
           password: password,
+    hallName: hallName,
         }),
       });
 
@@ -86,7 +88,13 @@ export default function RegisterScreen() {
         value={email}
         onChangeText={setEmail}
       />
-
+ <TextInput
+        style={styles.input}
+        placeholder="Hall Name"
+        autoCapitalize="words"
+        value={hallName}
+        onChangeText={setHallName}
+      />
 
       <TextInput
         style={styles.input}
