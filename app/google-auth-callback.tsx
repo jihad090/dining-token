@@ -25,6 +25,9 @@ export default function GoogleAuthCallback() {
         const role = userData.role || 'user';
         
         await AsyncStorage.setItem('userRole', role);
+        if (userData.hallName) {
+            await AsyncStorage.setItem('hallName', userData.hallName);
+        }
 
         if (role === 'hall_admin') {
           router.replace('/(hall-authority)/professional-dashboard');
