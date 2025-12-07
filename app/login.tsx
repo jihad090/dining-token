@@ -46,6 +46,12 @@ export default function LoginScreen() {
       }
 
       await AsyncStorage.setItem('userToken', data.access_token);
+
+      if (data.user.hallName) {
+            await AsyncStorage.setItem('hallName', data.user.hallName);
+        } else {
+            await AsyncStorage.removeItem('hallName'); 
+        }
       
       if (data.user) {
         await AsyncStorage.setItem('userInfo', JSON.stringify(data.user));
@@ -97,6 +103,7 @@ export default function LoginScreen() {
   const handleGoogleLogin = async () => {
       try {
         await WebBrowser.openBrowserAsync(`${API_BASE_URL}/auth/google`);
+        
       } catch (e) {
         Alert.alert("Error", "Google Login Failed");
       }
