@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect,useCallback } from "react";
 import {
   StyleSheet,
   View,
@@ -94,19 +94,21 @@ useEffect(() => {
 
 
 
-  useFocusEffect(
-    React.useCallback(() => {
-      setLastScanResult({
-        status: null,
-        message: "Ready to scan",
-        meal: null
-      });
-      setIsScanning(false);
-      setIsProcessing(false);
-      if (scanTimeoutRef.current) {
-        clearTimeout(scanTimeoutRef.current);
-        scanTimeoutRef.current = null;
-      }
+ useFocusEffect(
+    useCallback(() => {
+      const loadHallName = async () => {
+        try {
+          const name = await AsyncStorage.getItem('hallName');
+          if (name) {
+            setHallName(name);
+          }
+        } catch (e) {
+          console.log("Error loading hall name", e);
+        }
+      };
+      
+      loadHallName();
+      
     }, [])
   );
 
@@ -350,7 +352,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  // Button
   scanButton: {
     backgroundColor: "#4F46E5",
     paddingVertical: 16,
