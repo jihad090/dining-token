@@ -21,8 +21,8 @@ interface ScanRecord {
 }
 
 const HALL_TIMINGS = {
-  LUNCH_START: 13,
-  DINNER_START: 20,
+  LUNCH_START: 9,
+  DINNER_START: 21,
 };
 
 const INITIAL_STATUS: MealStatus = {
@@ -36,13 +36,14 @@ const INITIAL_STATUS: MealStatus = {
 
 
 
-const fetchDiningBoyData = async (): Promise<{ status: MealStatus, history: ScanRecord[] }> => {
+const fetchDiningBoyData = async (): Promise<{ status: MealStatus, history: ScanRecord[],hallName: string }> => {//change
   try {
 
     const token = await AsyncStorage.getItem('userToken');
+    const storedHallName = await AsyncStorage.getItem('hallName');
     if (!token) {
       console.log("No token found in storage");
-      return { status: INITIAL_STATUS, history: [] };
+      return { status: INITIAL_STATUS, history: [],hallName: 'Muktijoddha Hall' };//change
     }
 
     // 2. Call API
@@ -79,11 +80,13 @@ const fetchDiningBoyData = async (): Promise<{ status: MealStatus, history: Scan
         mealsEaten: data.count,
       },
       history: mappedHistory,
+      hallName: data.hallName || storedHallName || 'Muktijoddha Hall',//change
     };
 
   } catch (error) {
     console.error("Error fetching dining history:", error);
-    return { status: INITIAL_STATUS, history: [] };
+    const storedHallName = await AsyncStorage.getItem('hallName');
+    return { status: INITIAL_STATUS, history: [],hallName: storedHallName || 'Muktijoddha Hall' };//here change
   }
 };
 
@@ -91,6 +94,7 @@ export default function DiningBoyDashboard() {
   const [mealStatus, setMealStatus] = useState<MealStatus>(INITIAL_STATUS);
   const [scanHistory, setScanHistory] = useState<ScanRecord[]>([]);
   const [loading, setLoading] = useState(true);
+const [hallName, setHallName] = useState<string>('Loading Hall...');
 
   const tokensRemaining = mealStatus.totalMealsToday - mealStatus.mealsEaten;
   const tokenWarning = mealStatus.mealsEaten > mealStatus.totalMealsToday * 0.8;
@@ -135,22 +139,8 @@ const handleLogout = async () => {
     }
   };
 
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     let isActive = true;
-  //     setLoading(true);
 
-  //     fetchDiningBoyData().then((data) => {
-  //       if (isActive) {
-  //         setMealStatus(data.status);
-  //         setScanHistory(data.history);
-  //         setLoading(false);
-  //       }
-  //     });
 
-  //     return () => { isActive = false; };
-  //   }, [])
-  // );
 useFocusEffect(
     useCallback(() => {
       let isActive = true;
@@ -166,6 +156,7 @@ useFocusEffect(
           } else {
             setMealStatus(data.status);
             setScanHistory(data.history);
+            setHallName(data.hallName); 
             setLoading(false);
           }
         }
@@ -206,7 +197,7 @@ useFocusEffect(
 
   return (
     <View style={styles.container}>
-      <Text style={styles.hallName}>Muktijoddha Hall</Text>
+      <Text style={styles.hallName}>{hallName}</Text>
       <Text style={styles.dashboardTitle}>Dining Boy Dashboard</Text>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>

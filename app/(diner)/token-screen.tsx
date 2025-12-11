@@ -60,7 +60,7 @@ export default function TokenScreen() {
   const isScanTimeForSelected = () => {
     const hour = new Date().getHours();
     if (selectedMeal === 'Lunch') {
-      return hour >= 13 && hour < 15;
+      return hour >= 9 && hour < 15;
     } else {
       return hour >= 21 && hour < 23;
     }
@@ -101,7 +101,7 @@ export default function TokenScreen() {
     }
 
     if (!isTime) {
-      const timeMsg = selectedMeal === 'Lunch' ? "1:00 PM - 3:00 PM" : "9:00 PM - 11:00 PM";
+      const timeMsg = selectedMeal === 'Lunch' ? "9:00 PM - 3:00 PM" : "9:00 PM - 11:00 PM";
       return (
         <View style={styles.centerBox}>
           <Ionicons name="time-outline" size={80} color="#F59E0B" />

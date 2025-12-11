@@ -34,7 +34,7 @@ export default function PdfScreen() {
   const [tokens, setTokens] = useState<Token[]>([]);
   const [loading, setLoading] = useState(true);
   const [generatingPdf, setGeneratingPdf] = useState(false);
-
+const [hallName, setHallName] = useState<string>('Muktijoddha Hall');
   useFocusEffect(
     React.useCallback(() => {
       fetchUpcomingTokens();
@@ -45,6 +45,11 @@ export default function PdfScreen() {
     setLoading(true);
     try {
       const token = await AsyncStorage.getItem('userToken');
+
+      const storedHallName = await AsyncStorage.getItem('hallName');
+      if (storedHallName) {
+        setHallName(storedHallName);
+      }
       const response = await fetch(`${API_BASE_URL}/dining-token/upcoming`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -104,7 +109,7 @@ export default function PdfScreen() {
             </style>
           </head>
           <body>
-            <h1>Muktijoddha Hall</h1>
+            <h1>${hallName}</h1>
             <h2>All Token PDF</h2>
             <div class="grid-container">
               ${tokens.map(token => {
@@ -148,7 +153,7 @@ export default function PdfScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.hallName}>Muktijoddha Hall</Text>
+      <Text style={styles.hallName}>{hallName}</Text>
       <Text style={styles.subtitle}>All Token PDF</Text>
 
       <View style={styles.gridWrapper}>

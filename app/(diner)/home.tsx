@@ -33,8 +33,8 @@ interface HistoryItem {
 }
 
 const HALL_TIMINGS = {
-  LUNCH_START: 13,
-  DINNER_START: 20,
+  LUNCH_START: 9,
+  DINNER_START: 21,
 };
 
 const fetchDinerData = async (): Promise<{ status: MealStatus; tokens: TokenStatus }> => {
@@ -79,10 +79,10 @@ export default function DinerDashboard() {
   const [amount, setAmount] = useState(0);
   const [calculatedDays, setCalculatedDays] = useState(0);
   const [submitting, setSubmitting] = useState(false);
-
+const [hasPendingRequest, setHasPendingRequest] = useState(false);
+const [myHallName, setMyHallName] = useState<string>('Loading Hall...');
   const MEAL_RATE_PER_DAY = 40;
 
-  // --- 1. Secure Logout Function ---
   const handleLogout = async () => {
     try {
       await AsyncStorage.multiRemove(['userToken', 'token', 'accessToken']); 
@@ -131,6 +131,12 @@ export default function DinerDashboard() {
     setLoadingHistory(true);
     try {
       const token = await AsyncStorage.getItem('userToken');
+      const storedHallName = await AsyncStorage.getItem('hallName');
+      if (storedHallName) {
+        setMyHallName(storedHallName);
+      } else {
+        setMyHallName(" Welcome CUETian"); 
+      }
       if (!token) {
         console.log("No token found, logging out...");
         handleLogout();
@@ -150,11 +156,26 @@ export default function DinerDashboard() {
         return;
       }
 
+
       const historyData = await historyResponse.json();
+     const isPending = historyData.some((item: any) => item.status === 'PENDING');
+    setHasPendingRequest(isPending);
 
       if (historyResponse.ok) {
         setHistoryList(historyData);
       }
+
+      const trxResponse = await fetch(`${API_BASE_URL}/transactions/my-history`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (trxResponse.ok) {
+        const trxData = await trxResponse.json();
+        
+        const isPending = trxData.some((item: any) => item.status === 'PENDING');
+        setHasPendingRequest(isPending); 
+      }
+
       
       // 2. Fetch Upcoming Tokens 
       const upcomingResponse = await fetch(`${API_BASE_URL}/dining-token/upcoming`, {
@@ -198,7 +219,14 @@ export default function DinerDashboard() {
   }, [packageType]);
 
   const handleOrderPress = () => {
-    const isOrderBlocked = upcomingTokensCount > 0;
+    if (hasPendingRequest) {
+      Alert.alert(
+        "Request Pending", 
+        "You already have a pending request. Please wait for manager approval."
+      );
+      return; 
+    }
+    const isOrderBlocked = upcomingTokensCount > 2;
     
     if (isOrderBlocked) {
       const daysCovered = Math.floor(upcomingTokensCount / 2);
@@ -208,7 +236,7 @@ export default function DinerDashboard() {
       tokenExpirationDate.setDate(today.getDate() + daysCovered); 
       
       const nextPurchaseDate = new Date(tokenExpirationDate);
-      nextPurchaseDate.setDate(tokenExpirationDate.getDate() - 1);
+      nextPurchaseDate.setDate(tokenExpirationDate.getDate() );
 
       const nextPurchaseDateString = nextPurchaseDate.toLocaleDateString('en-GB', {
         day: 'numeric',
@@ -255,6 +283,7 @@ export default function DinerDashboard() {
       if (response.ok) {
         Alert.alert("Success", "Order Placed! Wait for Manager Approval.");
         setModalVisible(false);
+        setHasPendingRequest(true);//new add
         setTrxId('');
         setBkashNumber('');
         loadData();
@@ -265,6 +294,7 @@ export default function DinerDashboard() {
       Alert.alert("Error", "Network Error");
     } finally {
       setSubmitting(false);
+      setHasPendingRequest(true);//new add
     }
   };
 
@@ -286,7 +316,7 @@ export default function DinerDashboard() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.hallName}>Muktijoddha Hall</Text>
+      <Text style={styles.hallName}>{myHallName}</Text>
       <Text style={styles.dashboardTitle}>Diner Dashboard</Text>
 
       <ScrollView
@@ -379,10 +409,33 @@ export default function DinerDashboard() {
         <AntDesign name="logout" size={24} color="black" />
       </TouchableOpacity>
       
-      <TouchableOpacity onPress={handleOrderPress} style={styles.fab}>
-        <Ionicons name="add-circle" size={30} color="#fff" />
-        <Text style={styles.fabText}>Order Next Plan</Text>
-      </TouchableOpacity>
+
+
+
+
+     {/* FAB Button Updated */}
+<TouchableOpacity 
+  onPress={handleOrderPress} 
+  style={[
+    styles.fab, 
+    (hasPendingRequest || upcomingTokensCount > 2) && { backgroundColor: '#6B7280' } 
+  ]}
+  disabled={hasPendingRequest}
+>
+  <Ionicons 
+    name={hasPendingRequest ? "time-outline" : upcomingTokensCount > 0 ? "checkmark-circle-outline" : "add-circle"} 
+    size={30} 
+    color="#fff" 
+  />
+  <Text style={styles.fabText}>
+    {hasPendingRequest 
+      ? "Request Pending" 
+      : upcomingTokensCount > 2 
+        ? "Plan Active" 
+        : "Order Next Token"
+    }
+  </Text>
+</TouchableOpacity>
 
       <Modal animationType="slide" transparent={true} visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalOverlay}>
@@ -549,3 +602,8 @@ const styles = StyleSheet.create({
   submitBtn: { backgroundColor: '#10B981', padding: 15, borderRadius: 10, alignItems: 'center', marginTop: 10 },
   submitBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' }
 });
+
+
+
+
+

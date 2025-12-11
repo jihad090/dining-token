@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useCallback } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert, TextInput, RefreshControl } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { router } from 'expo-router';
+import { router,useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '@/constants/api';
 
@@ -47,8 +47,8 @@ interface DiningBoy {
 type ManagerTab = 'Dashboard' | 'Approvals' | 'Assignment';
 
 const HALL_TIMINGS = {
-  LUNCH_START: 16,
-  DINNER_START: 20,
+  LUNCH_START: 9,
+  DINNER_START: 21,
 };
 
 const fetchManagerData = async (): Promise<{ status: MealStatus }> => {
@@ -291,7 +291,23 @@ useEffect(() => {
     fetchUserProfile();
   }, []);
 
-
+useFocusEffect(
+    useCallback(() => {
+      const loadHallInfo = async () => {
+        try {
+          const storedHallName = await AsyncStorage.getItem('hallName');
+          if (storedHallName) {
+            setHallName(storedHallName);
+          } else {
+            setHallName('Hall Not Found');
+          }
+        } catch (error) {
+          console.error('Failed to load hall name', error);
+        }
+      };
+      loadHallInfo();
+    }, [])
+  );
 
   const fetchDashboardData = async () => {
     setLoading(true);

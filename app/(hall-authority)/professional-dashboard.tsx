@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   StyleSheet,
   View,
@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { router,Stack } from 'expo-router';
+import { router,Stack, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '@/constants/api';
 type AuthorityTab = 'Dashboard' | 'HallInfo' | 'Managers' | 'Halls';
@@ -100,11 +100,14 @@ const HallInfoSection = ({
   hallInfo: HallInfo;
   onUpdate: (updated: HallInfo) => void;
 }) => {
+  
   const [localInfo, setLocalInfo] = useState<HallInfo>(hallInfo);
-
+  
   useEffect(() => {
     setLocalInfo(hallInfo);
   }, [hallInfo]);
+
+
 
   const handleSave = () => {
     if (!localInfo.name.trim()) {
@@ -447,7 +450,7 @@ export default function HallAuthorityDashboard() {
   const [foundStudent, setFoundStudent] = useState<any>(null);
   const [searching, setSearching] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
-
+const [myHallName, setMyHallName] = useState<string>('Loading Hall...');
 
   const fetchProvostInfo = async () => {
     try {
@@ -467,6 +470,39 @@ export default function HallAuthorityDashboard() {
       console.error("Failed to fetch provost info", e);
     }
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const loadData = async () => {
+        try {
+          const storedName = await AsyncStorage.getItem('hallName');
+          if (isActive) {
+            if (storedName) {
+              setMyHallName(storedName);
+            } else {
+              setMyHallName("Unknown Hall");
+            }
+          }
+        } catch (error) {
+          console.error("Failed to load hall name from storage", error);
+        }
+
+        if (isActive) {
+          await fetchProvostInfo();
+        }
+      };
+
+      loadData();
+
+      return () => {
+        isActive = false;
+      };
+    }, [])
+  );
+
+  
 
   const fetchManagers = async () => {
     try {
@@ -679,7 +715,7 @@ export default function HallAuthorityDashboard() {
     <View style={styles.container}>
       <Text style={styles.hallName}>Hall Authority Dashboard</Text>
       <Text style={styles.dashboardTitle}>
-        {hallInfo.name} Control & Monitoring
+        {myHallName} Control & Monitoring
       </Text>
 
       <View style={styles.tabBar}>

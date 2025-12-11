@@ -56,6 +56,7 @@ export default function QrScannerScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [isScanning, setIsScanning] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [hallName, setHallName] = useState<string>('Muktijoddha Hall');
   const [lastScanResult, setLastScanResult] = useState<{
     status: "success" | "failure" | null;
     message: string;
@@ -70,6 +71,7 @@ export default function QrScannerScreen() {
 
   useFocusEffect(
     React.useCallback(() => {
+      // রিসেট লজিক (যা আগে ছিল)
       setLastScanResult({
         status: null,
         message: "Ready to scan",
@@ -81,9 +83,22 @@ export default function QrScannerScreen() {
         clearTimeout(scanTimeoutRef.current);
         scanTimeoutRef.current = null;
       }
+
+      const loadHallName = async () => {
+        try {
+          const storedHall = await AsyncStorage.getItem('hallName');
+          if (storedHall) {
+            setHallName(storedHall);
+          }
+        } catch (error) {
+          console.log('Failed to load hall name', error);
+        }
+      };
+      
+      loadHallName();
+
     }, [])
   );
-
   const handleBarcodeScanned = async ({ data }: { data: string }) => {
     if (!isScanning || isProcessing) return;
 
@@ -133,7 +148,7 @@ export default function QrScannerScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <Text style={styles.hallName}>Muktijoddha Hall</Text>
+        <Text style={styles.hallName}>{hallName}</Text>
         <Text style={styles.subtitle}>Token Scanner</Text>
       </View>
 
