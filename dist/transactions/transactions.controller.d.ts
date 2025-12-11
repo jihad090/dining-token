@@ -8,7 +8,7 @@ export declare class TransactionsController {
     }> & {
         __v: number;
     }>;
-    getPending(req: any): Promise<(import("mongoose").Document<unknown, {}, import("./schemas/transaction.schema").TransactionDocument, {}, {}> & import("./schemas/transaction.schema").Transaction & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    getMyHistory(req: any): Promise<(import("mongoose").Document<unknown, {}, import("./schemas/transaction.schema").TransactionDocument, {}, {}> & import("./schemas/transaction.schema").Transaction & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
@@ -24,6 +24,11 @@ export declare class TransactionsController {
         __v: number;
     }>;
     getHistory(req: any): Promise<(import("mongoose").Document<unknown, {}, import("./schemas/transaction.schema").TransactionDocument, {}, {}> & import("./schemas/transaction.schema").Transaction & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    })[]>;
+    getPending(req: any): Promise<(import("mongoose").Document<unknown, {}, import("./schemas/transaction.schema").TransactionDocument, {}, {}> & import("./schemas/transaction.schema").Transaction & import("mongoose").Document<import("mongoose").Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;

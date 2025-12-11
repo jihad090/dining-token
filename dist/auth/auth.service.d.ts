@@ -17,6 +17,7 @@ export declare class AuthService {
             email: any;
             status: any;
             role: any;
+            hallName: any;
         };
     }>;
     googleLogin(googleUser: any): Promise<{
@@ -27,6 +28,7 @@ export declare class AuthService {
             email: any;
             status: any;
             role: any;
+            hallName: any;
         };
     }>;
     private generateToken;

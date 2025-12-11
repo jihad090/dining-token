@@ -12,17 +12,9 @@ export declare class UsersController {
     } & {
         __v: number;
     }>;
-    findStudent(req: any, email: string): Promise<{
-        name: string;
-        email: string;
-        googleId: string;
-        avatar: string;
-        phoneNumber: string;
-        student_id: string;
-        hallName: string;
-        status: string;
-        role: string;
+    findStudent(req: any, email: string): Promise<import("mongoose").Document<unknown, {}, import("./schemas/user.schema").User, {}, {}> & import("./schemas/user.schema").User & {
         _id: import("mongoose").Types.ObjectId;
+    } & {
         __v: number;
     }>;
     promoteStudent(req: any, body: {

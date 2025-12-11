@@ -30,11 +30,11 @@ export class User {
   @Prop()
   phoneNumber: string;
 
-  @Prop()
-  student_id: string;
+  @Prop({ required: false, default: null })
+  student_id?: string;
   
-  @Prop({ default: null })
-hallName: string;
+ @Prop({ required: false, default: null })
+hallName?: string;
 
   @Prop({ default: VerificationStatus.NEW })
   status: string;

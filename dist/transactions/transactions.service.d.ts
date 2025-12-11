@@ -2,16 +2,18 @@ import { Model, Types } from 'mongoose';
 import { Transaction, TransactionDocument } from './schemas/transaction.schema';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { DiningTokenService } from '../dining-token/dining-token.service';
+import { TransactionsGateway } from './transactions.gateway';
 export declare class TransactionsService {
     private trxModel;
     private readonly diningTokenService;
-    constructor(trxModel: Model<TransactionDocument>, diningTokenService: DiningTokenService);
+    private readonly transactionsGateway;
+    constructor(trxModel: Model<TransactionDocument>, diningTokenService: DiningTokenService, transactionsGateway: TransactionsGateway);
     createOrder(userId: string, createTrxDto: CreateTransactionDto): Promise<import("mongoose").Document<unknown, {}, TransactionDocument, {}, {}> & Transaction & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
     }>;
-    getPendingTransactions(): Promise<(import("mongoose").Document<unknown, {}, TransactionDocument, {}, {}> & Transaction & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    getPendingTransactions(hallName: string): Promise<(import("mongoose").Document<unknown, {}, TransactionDocument, {}, {}> & Transaction & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;
@@ -26,7 +28,12 @@ export declare class TransactionsService {
     }> & {
         __v: number;
     }>;
-    getTransactionHistory(): Promise<(import("mongoose").Document<unknown, {}, TransactionDocument, {}, {}> & Transaction & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    getTransactionHistory(hallName: string): Promise<(import("mongoose").Document<unknown, {}, TransactionDocument, {}, {}> & Transaction & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    })[]>;
+    getUserTransactions(userId: string): Promise<(import("mongoose").Document<unknown, {}, TransactionDocument, {}, {}> & Transaction & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;

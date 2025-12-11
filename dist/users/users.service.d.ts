@@ -1,8 +1,10 @@
 import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
+import { DiningTokenService } from '../dining-token/dining-token.service';
 export declare class UsersService {
     private userModel;
-    constructor(userModel: Model<User>);
+    private diningTokenService;
+    constructor(userModel: Model<User>, diningTokenService: DiningTokenService);
     create(data: any): Promise<import("mongoose").Document<unknown, {}, User, {}, {}> & User & {
         _id: import("mongoose").Types.ObjectId;
     } & {
@@ -36,7 +38,12 @@ export declare class UsersService {
     } & {
         __v: number;
     })[]>;
-    changeUserRole(email: string, newRole: string, hallName: string): Promise<import("mongoose").Document<unknown, {}, User, {}, {}> & User & {
+    findStudentInHall(email: string, hallName: string): Promise<import("mongoose").Document<unknown, {}, User, {}, {}> & User & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }>;
+    changeUserRole(email: string, newRole: string, adminHallName: string): Promise<import("mongoose").Document<unknown, {}, User, {}, {}> & User & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;

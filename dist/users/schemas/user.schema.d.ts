@@ -13,8 +13,8 @@ export declare class User {
     googleId: string;
     avatar: string;
     phoneNumber: string;
-    student_id: string;
-    hallName: string;
+    student_id?: string;
+    hallName?: string;
     status: string;
     role: string;
 }

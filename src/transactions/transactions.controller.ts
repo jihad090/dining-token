@@ -15,15 +15,12 @@ export class TransactionsController {
   }
 
   
-  @Get('pending')
-  async getPending(@Request() req) {
-    
-    if (req.user.role !== 'manager' && req.user.role !== 'hall_admin') {
-        throw new UnauthorizedException('Access Denied: Only Managers Allowed');
-    }
-    return this.transactionsService.getPendingTransactions();
+ 
+//in diner home page history fetch
+  @Get('my-history')
+  async getMyHistory(@Request() req) {
+    return this.transactionsService.getUserTransactions(req.user.sub);
   }
-
   
   @Post('approve/:id')
   async approveOrder(@Request() req, @Param('id') id: string) {
@@ -43,8 +40,19 @@ export class TransactionsController {
   @Get('history')
   async getHistory(@Request() req) {
     if (req.user.role !== 'manager' && req.user.role !== 'hall_admin') {
-        throw new UnauthorizedException('Access Denied');
+        throw new UnauthorizedException('Access Denied: Only Managers Allowed');
     }
-    return this.transactionsService.getTransactionHistory();
+    return this.transactionsService.getTransactionHistory(req.user.hallName);
+  }
+
+  //manager get pending requests  based on hall
+  @Get('pending')
+  async getPending(@Request() req) {
+    
+    if (req.user.role !== 'manager' && req.user.role !== 'hall_admin') {
+        throw new UnauthorizedException('Access Denied: Only Managers Allowed');
+    }
+    
+    return this.transactionsService.getPendingTransactions(req.user.hallName);
   }
 }

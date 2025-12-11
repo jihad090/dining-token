@@ -21,7 +21,11 @@ let DiningTokenController = class DiningTokenController {
         this.diningTokenService = diningTokenService;
     }
     async scanToken(req, body) {
-        return this.diningTokenService.scanToken(body.tokenID, req.user.sub);
+        const scannerHall = req.user.hallName || req.user.hallId;
+        if (!scannerHall) {
+            throw new common_1.UnauthorizedException('Scanner Hall ID not found in user session.');
+        }
+        return this.diningTokenService.scanToken(body.tokenID, req.user.sub, req.user.role, scannerHall);
     }
     async getMyStatus(req) {
         return this.diningTokenService.getMyTokenStatus(req.user.sub);
@@ -36,7 +40,16 @@ let DiningTokenController = class DiningTokenController {
         return this.diningTokenService.getTokenHistory(userId);
     }
     async getDiningBoyHistory(req) {
+        if (req.user.role !== 'dining_boy' && req.user.role !== 'manager') {
+            throw new common_1.UnauthorizedException('Only Dining Boys and Managers can view scan history');
+        }
         return this.diningTokenService.getDiningBoyScanHistory(req.user.sub);
+    }
+    async extendClosure(req, body) {
+        if (req.user.role !== 'manager' && req.user.role !== 'hall_admin') {
+            throw new common_1.UnauthorizedException('Access Denied: Only Manager or Hall Admin Allowed to extend tokens');
+        }
+        return this.diningTokenService.handleEmergencyExtension(body.startDate, body.endDate, body.reason, req.user.sub);
     }
 };
 exports.DiningTokenController = DiningTokenController;
@@ -76,6 +89,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], DiningTokenController.prototype, "getDiningBoyHistory", null);
+__decorate([
+    (0, common_1.Post)('extend-closure'),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], DiningTokenController.prototype, "extendClosure", null);
 exports.DiningTokenController = DiningTokenController = __decorate([
     (0, common_1.Controller)('dining-token'),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard),

@@ -6,10 +6,11 @@ export declare class DiningTokenService {
     issueTokens(userId: string, days: number, transactionId: string): Promise<{
         message: string;
     }>;
-    scanToken(tokenID: string, diningBoyId: string): Promise<{
+    scanToken(tokenID: string, scannerId: string, scannerRole: string, scannerHall: string): Promise<{
         success: boolean;
         message: string;
         meal: string;
+        studentName: any;
     }>;
     getMyTokenStatus(userId: string): Promise<{
         tokens: (import("mongoose").Document<unknown, {}, DiningTokenDocument, {}, {}> & DiningToken & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
@@ -35,5 +36,15 @@ export declare class DiningTokenService {
             __v: number;
         })[];
         count: number;
+    }>;
+    grantManagerFreeAccess(userId: string): Promise<{
+        message: string;
+    }>;
+    revokeManagerAccess(userId: string): Promise<import("mongodb").DeleteResult>;
+    handleEmergencyExtension(startDateStr: string, endDateStr: string, reason: string, adminId: string): Promise<{
+        success: boolean;
+        message: string;
+        shiftedCount: number;
+        closureDays: number;
     }>;
 }

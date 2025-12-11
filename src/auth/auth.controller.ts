@@ -7,6 +7,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from '../users/users.service';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import { RegisterDto, LoginDto } from './dto/auth.dto';
 @Controller('auth') 
 export class AuthController {
   constructor(private authService: AuthService,
@@ -15,7 +16,7 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  register(@Body() body: any) {
+  register(@Body() body: RegisterDto) {
     return this.authService.register(body);
   }
 @Get('profile')
@@ -25,22 +26,26 @@ export class AuthController {
 return this.usersService.findById(req.user.sub);
 }
   @Post('login')
-  login(@Body() body: any) {
+  login(@Body() body: LoginDto) {
     return this.authService.signIn(body.email, body.password);
   }
 @Get('google')
   @UseGuards(AuthGuard('google')) 
   async googleAuth(@Request() req) {
   }
+  
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  
 
   async googleAuthRedirect(@Req() req, @Res() res) {
     const { access_token } = req.user;
 const frontendUrl = this.configService.get<string>('FRONTEND_REDIRECT_HOST');
 return  res.redirect(`${frontendUrl}/--/google-auth-callback?token=${access_token}`);
   }
+
+
+
+  //only first time run
   @Get('seed-admin') 
   async seedAdmin() {
     const existingAdmin = await this.usersService.findOne('provost@cuet.ac.bd');

@@ -10,8 +10,17 @@ export class DiningTokenController {
   @Post('scan')
   async scanToken(@Request() req, @Body() body: { tokenID: string }) {
     
+   const scannerHall = req.user.hallName || req.user.hallId;
    
-    return this.diningTokenService.scanToken(body.tokenID, req.user.sub);
+   if (!scannerHall) {
+        throw new UnauthorizedException('Scanner Hall ID not found in user session.');
+    }
+    return this.diningTokenService.scanToken(
+        body.tokenID, 
+        req.user.sub, 
+        req.user.role,
+        scannerHall
+    );
   }
 
   @Get('my-status')
@@ -31,7 +40,23 @@ export class DiningTokenController {
   }
   @Get('dining-boy/history')
   async getDiningBoyHistory(@Request() req) {
+    if (req.user.role !== 'dining_boy' && req.user.role !== 'manager') {
+       throw new UnauthorizedException('Only Dining Boys and Managers can view scan history');
+    }
     return this.diningTokenService.getDiningBoyScanHistory(req.user.sub);
   }
+  
+  @Post('extend-closure')
+async extendClosure(@Request() req, @Body() body: { startDate: string, endDate: string, reason: string }) {
+    if (req.user.role !== 'manager' && req.user.role !== 'hall_admin') {
+        throw new UnauthorizedException('Access Denied: Only Manager or Hall Admin Allowed to extend tokens');
+    }
 
+    return this.diningTokenService.handleEmergencyExtension(
+        body.startDate,
+        body.endDate,
+        body.reason,
+        req.user.sub
+    );
+  }
 }

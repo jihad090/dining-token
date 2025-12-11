@@ -14,6 +14,7 @@ const transactions_controller_1 = require("./transactions.controller");
 const transaction_schema_1 = require("./schemas/transaction.schema");
 const auth_module_1 = require("../auth/auth.module");
 const dining_token_module_1 = require("../dining-token/dining-token.module");
+const transactions_gateway_1 = require("./transactions.gateway");
 let TransactionsModule = class TransactionsModule {
 };
 exports.TransactionsModule = TransactionsModule;
@@ -22,10 +23,10 @@ exports.TransactionsModule = TransactionsModule = __decorate([
         imports: [
             mongoose_1.MongooseModule.forFeature([{ name: transaction_schema_1.Transaction.name, schema: transaction_schema_1.TransactionSchema }]),
             auth_module_1.AuthModule,
-            dining_token_module_1.DiningTokenModule
+            dining_token_module_1.DiningTokenModule,
         ],
         controllers: [transactions_controller_1.TransactionsController],
-        providers: [transactions_service_1.TransactionsService],
+        providers: [transactions_service_1.TransactionsService, transactions_gateway_1.TransactionsGateway],
     })
 ], TransactionsModule);
 //# sourceMappingURL=transactions.module.js.map

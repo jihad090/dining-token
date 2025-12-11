@@ -14,6 +14,7 @@ const auth_module_1 = require("./auth/auth.module");
 const config_1 = require("@nestjs/config");
 const dining_token_module_1 = require("./dining-token/dining-token.module");
 const transactions_module_1 = require("./transactions/transactions.module");
+const halls_module_1 = require("./halls/halls.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -35,6 +36,7 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
             dining_token_module_1.DiningTokenModule,
             transactions_module_1.TransactionsModule,
+            halls_module_1.HallsModule,
         ],
     })
 ], AppModule);

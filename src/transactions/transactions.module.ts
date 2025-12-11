@@ -5,14 +5,16 @@ import { TransactionsController } from './transactions.controller';
 import { Transaction, TransactionSchema } from './schemas/transaction.schema';
 import { AuthModule } from '../auth/auth.module';
 import { DiningTokenModule } from '../dining-token/dining-token.module'; 
+import { TransactionsGateway } from './transactions.gateway';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Transaction.name, schema: TransactionSchema }]),
     AuthModule,
-    DiningTokenModule 
+    DiningTokenModule,
+     
   ],
   controllers: [TransactionsController],
-  providers: [TransactionsService],
+  providers: [TransactionsService,TransactionsGateway],
 })
 export class TransactionsModule {}

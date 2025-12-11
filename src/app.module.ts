@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config'; 
 import { DiningTokenModule } from './dining-token/dining-token.module'; 
 import { TransactionsModule } from './transactions/transactions.module';
+import { HallsModule } from './halls/halls.module';
 @Module({
   imports: [
     
@@ -24,6 +25,7 @@ import { TransactionsModule } from './transactions/transactions.module';
     AuthModule,
     DiningTokenModule,
     TransactionsModule,
+    HallsModule,
   ],
 })
 export class AppModule {}

@@ -13,6 +13,7 @@ const users_service_1 = require("./users.service");
 const users_controller_1 = require("./users.controller");
 const user_schema_1 = require("./schemas/user.schema");
 const auth_module_1 = require("../auth/auth.module");
+const dining_token_module_1 = require("../dining-token/dining-token.module");
 let UsersModule = class UsersModule {
 };
 exports.UsersModule = UsersModule;
@@ -21,6 +22,7 @@ exports.UsersModule = UsersModule = __decorate([
         imports: [
             mongoose_1.MongooseModule.forFeature([{ name: user_schema_1.User.name, schema: user_schema_1.UserSchema }]),
             (0, common_1.forwardRef)(() => auth_module_1.AuthModule),
+            dining_token_module_1.DiningTokenModule,
         ],
         controllers: [users_controller_1.UsersController],
         providers: [users_service_1.UsersService],

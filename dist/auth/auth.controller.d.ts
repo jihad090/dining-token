@@ -1,12 +1,13 @@
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { ConfigService } from '@nestjs/config';
+import { RegisterDto, LoginDto } from './dto/auth.dto';
 export declare class AuthController {
     private authService;
     private usersService;
     private configService;
     constructor(authService: AuthService, usersService: UsersService, configService: ConfigService);
-    register(body: any): Promise<import("mongoose").Document<unknown, {}, import("../users/schemas/user.schema").User, {}, {}> & import("../users/schemas/user.schema").User & {
+    register(body: RegisterDto): Promise<import("mongoose").Document<unknown, {}, import("../users/schemas/user.schema").User, {}, {}> & import("../users/schemas/user.schema").User & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
@@ -16,7 +17,7 @@ export declare class AuthController {
     } & {
         __v: number;
     }>;
-    login(body: any): Promise<{
+    login(body: LoginDto): Promise<{
         access_token: string;
         user: {
             id: any;
@@ -24,6 +25,7 @@ export declare class AuthController {
             email: any;
             status: any;
             role: any;
+            hallName: any;
         };
     }>;
     googleAuth(req: any): Promise<void>;

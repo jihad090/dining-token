@@ -17,9 +17,11 @@ const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const user_schema_1 = require("./schemas/user.schema");
+const dining_token_service_1 = require("../dining-token/dining-token.service");
 let UsersService = class UsersService {
-    constructor(userModel) {
+    constructor(userModel, diningTokenService) {
         this.userModel = userModel;
+        this.diningTokenService = diningTokenService;
     }
     async create(data) {
         const newUser = new this.userModel(data);
@@ -45,13 +47,34 @@ let UsersService = class UsersService {
             .sort({ createdAt: -1 })
             .exec();
     }
-    async changeUserRole(email, newRole, hallName) {
-        const user = await this.userModel.findOne({ email });
-        if (!user)
-            throw new Error("User not found");
+    async findStudentInHall(email, hallName) {
+        const user = await this.userModel.findOne({
+            email: email,
+            hallName: hallName
+        }).select('-password');
+        return user;
+    }
+    async changeUserRole(email, newRole, adminHallName) {
+        const user = await this.userModel.findOne({
+            email: email,
+            hallName: adminHallName
+        });
+        if (!user) {
+            throw new common_1.NotFoundException("Student not found within your hall.");
+        }
+        if (user.role === newRole) {
+            throw new common_1.ConflictException(`User is already a ${newRole}.`);
+        }
+        if (user.role === 'manager' && newRole !== 'manager') {
+            await this.diningTokenService.revokeManagerAccess(user._id.toString());
+            console.log(`Manager privileges revoked for: ${email}`);
+        }
         user.role = newRole;
-        user.hallName = hallName;
-        return user.save();
+        const savedUser = await user.save();
+        if (newRole === 'manager') {
+            await this.diningTokenService.grantManagerFreeAccess(savedUser._id.toString());
+        }
+        return savedUser;
     }
     async removeDiningBoy(email) {
         console.log(`--- REMOVE REQUEST ---`);
@@ -73,6 +96,7 @@ exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(user_schema_1.User.name)),
-    __metadata("design:paramtypes", [mongoose_2.Model])
+    __metadata("design:paramtypes", [mongoose_2.Model,
+        dining_token_service_1.DiningTokenService])
 ], UsersService);
 //# sourceMappingURL=users.service.js.map

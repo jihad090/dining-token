@@ -55,53 +55,41 @@ let DiningTokenService = class DiningTokenService {
         }
         return { message: `${tokensToInsert.length} tokens generated successfully` };
     }
-    async scanToken(tokenID, diningBoyId) {
-        const token = await this.diningTokenModel.findOne({ tokenID });
-        if (!token)
-            throw new common_1.NotFoundException('Invalid Token! QR Code not match.');
-        const now = new Date();
-        const tokenDate = new Date(token.date);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        tokenDate.setHours(0, 0, 0, 0);
+    async scanToken(tokenID, scannerId, scannerRole, scannerHall) {
+        const token = await this.diningTokenModel.findOne({ tokenID: tokenID })
+            .populate('ownerId', 'hallName name email')
+            .exec();
+        if (!token) {
+            throw new common_1.NotFoundException('Invalid Token ID');
+        }
+        const tokenOwner = token.ownerId;
+        const tokenHallName = tokenOwner === null || tokenOwner === void 0 ? void 0 : tokenOwner.hallName;
+        if (!tokenHallName || tokenHallName.trim() !== scannerHall.trim()) {
+            throw new common_1.ForbiddenException(`🚫 RESTRICTED: This token is for ${tokenHallName || 'Unknown Hall'}. It cannot be scanned in ${scannerHall}.`);
+        }
         if (token.status === 'Used') {
-            throw new common_1.ConflictException('WARNING: Token ALREADY USED!');
+            throw new common_1.ConflictException('⚠️ Token already USED!');
         }
         if (token.status === 'Expired') {
-            throw new common_1.BadRequestException('Token is EXPIRED!');
+            throw new common_1.BadRequestException('❌ Token EXPIRED!');
         }
-        if (tokenDate < today) {
-            throw new common_1.BadRequestException('Token Date is past! EXPIRED.');
+        const today = new Date();
+        const tokenDate = new Date(token.date);
+        const todayStr = today.toDateString();
+        const tokenDateStr = tokenDate.toDateString();
+        if (todayStr !== tokenDateStr) {
+            throw new common_1.BadRequestException(`❌ Invalid Date! This token is for ${tokenDateStr}, today is ${todayStr}.`);
         }
-        if (tokenDate > today) {
-            throw new common_1.BadRequestException(`Not Active Yet! Valid for ${tokenDate.toDateString()}.`);
-        }
-        const currentHour = now.getHours();
-        let isValidTime = false;
-        if (token.mealType === 'Lunch') {
-            if (currentHour >= 13 && currentHour < 15) {
-                isValidTime = true;
-            }
-            else {
-                throw new common_1.BadRequestException('Lunch meal time (1PM - 3PM) is over or not started!');
-            }
-        }
-        else if (token.mealType === 'Dinner') {
-            if (currentHour >= 21 && currentHour < 23) {
-                isValidTime = true;
-            }
-            else {
-                throw new common_1.BadRequestException('Dinner meal time (9PM - 11PM) is over or not started!');
-            }
-        }
-        if (isValidTime) {
-            token.status = 'Used';
-            token.scannedAt = new Date();
-            token.scannedBy = new mongoose_2.Types.ObjectId(diningBoyId);
-            await token.save();
-            return { success: true, message: 'Token Verified! Serve Food ✅', meal: token.mealType };
-        }
-        throw new common_1.BadRequestException('Token validation failed for unknown reason.');
+        token.status = 'Used';
+        token.scannedBy = new mongoose_2.Types.ObjectId(scannerId);
+        token.scannedAt = new Date();
+        await token.save();
+        return {
+            success: true,
+            message: 'Token Verified! Serve Food ✅',
+            meal: token.mealType,
+            studentName: tokenOwner === null || tokenOwner === void 0 ? void 0 : tokenOwner.name
+        };
     }
     async getMyTokenStatus(userId) {
         const today = new Date();
@@ -206,6 +194,104 @@ let DiningTokenService = class DiningTokenService {
             scannedAt: { $gte: todayStart, $lte: todayEnd }
         });
         return { history, count };
+    }
+    async grantManagerFreeAccess(userId) {
+        const today = new Date();
+        const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        const oneDay = 24 * 60 * 60 * 1000;
+        const diffDays = Math.round(Math.abs((lastDayOfMonth.getTime() - today.getTime()) / oneDay));
+        const daysToIssue = diffDays > 0 ? diffDays : 1;
+        return this.issueTokens(userId, daysToIssue, 'FREE_MANAGER_PERK');
+    }
+    async revokeManagerAccess(userId) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        console.log(`Revoking access for: ${userId}, Deleting tokens from: ${tomorrow}`);
+        const result = await this.diningTokenModel.deleteMany({
+            ownerId: new mongoose_2.Types.ObjectId(userId),
+            date: { $gte: tomorrow }
+        }).exec();
+        console.log(`Deleted ${result.deletedCount} tokens for demoted manager: ${userId}`);
+        return result;
+    }
+    async handleEmergencyExtension(startDateStr, endDateStr, reason, adminId) {
+        const closureStartDate = new Date(startDateStr);
+        const closureEndDate = new Date(endDateStr);
+        const diffInMilliseconds = closureEndDate.getTime() - closureStartDate.getTime();
+        const daysToShift = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24)) + 1;
+        if (daysToShift <= 0) {
+            throw new common_1.BadRequestException('Invalid date range for closure extension.');
+        }
+        const hallReopenDate = new Date(closureEndDate);
+        hallReopenDate.setDate(closureEndDate.getDate() + 1);
+        hallReopenDate.setHours(0, 0, 0, 0);
+        const affectedTokens = await this.diningTokenModel.find({
+            status: { $in: ['Active', 'Expired'] },
+            date: {
+                $gte: closureStartDate,
+                $lte: closureEndDate,
+            },
+        })
+            .sort({ ownerId: 1, date: 1, mealType: 1 })
+            .exec();
+        if (affectedTokens.length === 0) {
+            return {
+                success: true,
+                message: 'No unused tokens found within the closure period to extend.',
+                shiftedCount: 0,
+                closureDays: daysToShift,
+            };
+        }
+        const tokensByUser = affectedTokens.reduce((acc, token) => {
+            const ownerId = token.ownerId.toString();
+            if (!acc[ownerId]) {
+                acc[ownerId] = [];
+            }
+            acc[ownerId].push(token);
+            return acc;
+        }, {});
+        let totalShiftedCount = 0;
+        for (const ownerId of Object.keys(tokensByUser)) {
+            const tokensToShift = tokensByUser[ownerId];
+            const latestExistingToken = await this.diningTokenModel.findOne({
+                ownerId: new mongoose_2.Types.ObjectId(ownerId),
+                status: 'Active',
+            })
+                .sort({ date: -1 })
+                .exec();
+            let currentShiftDate = new Date(hallReopenDate);
+            if (latestExistingToken) {
+                currentShiftDate = new Date(latestExistingToken.date);
+                currentShiftDate.setDate(currentShiftDate.getDate() + 1);
+            }
+            currentShiftDate.setHours(0, 0, 0, 0);
+            const mealsPerDay = 2;
+            for (let i = 0; i < tokensToShift.length; i++) {
+                const token = tokensToShift[i];
+                const daysToAdd = Math.floor(i / mealsPerDay);
+                let finalNewDate = new Date(currentShiftDate);
+                finalNewDate.setDate(currentShiftDate.getDate() + daysToAdd);
+                finalNewDate.setHours(0, 0, 0, 0);
+                await this.diningTokenModel.updateOne({ _id: token._id }, {
+                    $set: {
+                        date: finalNewDate,
+                        status: 'Active',
+                        extendedReason: reason,
+                        extendedBy: new mongoose_2.Types.ObjectId(adminId),
+                        extendedOn: new Date(),
+                    }
+                }).exec();
+                totalShiftedCount++;
+            }
+        }
+        return {
+            success: true,
+            message: `${totalShiftedCount} unused tokens have been dynamically re-activated and shifted.`,
+            shiftedCount: totalShiftedCount,
+            closureDays: daysToShift,
+        };
     }
 };
 exports.DiningTokenService = DiningTokenService;

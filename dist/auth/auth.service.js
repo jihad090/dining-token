@@ -57,6 +57,8 @@ let AuthService = class AuthService {
                 avatar: googleUser.picture,
                 status: 'new',
                 tokens: 0,
+                hallName: null,
+                role: 'user',
             });
         }
         return this.generateToken(user);
@@ -66,7 +68,8 @@ let AuthService = class AuthService {
             sub: user._id,
             email: user.email,
             role: user.role,
-            status: user.status
+            status: user.status,
+            hallName: user.hallName || null
         };
         return {
             access_token: await this.jwtService.signAsync(payload),
@@ -75,7 +78,8 @@ let AuthService = class AuthService {
                 name: user.name,
                 email: user.email,
                 status: user.status,
-                role: user.role
+                role: user.role,
+                hallName: user.hallName
             },
         };
     }

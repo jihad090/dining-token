@@ -24,11 +24,8 @@ let TransactionsController = class TransactionsController {
     async createOrder(req, body) {
         return this.transactionsService.createOrder(req.user.sub, body);
     }
-    async getPending(req) {
-        if (req.user.role !== 'manager' && req.user.role !== 'hall_admin') {
-            throw new common_1.UnauthorizedException('Access Denied: Only Managers Allowed');
-        }
-        return this.transactionsService.getPendingTransactions();
+    async getMyHistory(req) {
+        return this.transactionsService.getUserTransactions(req.user.sub);
     }
     async approveOrder(req, id) {
         if (req.user.role !== 'manager' && req.user.role !== 'hall_admin') {
@@ -44,9 +41,15 @@ let TransactionsController = class TransactionsController {
     }
     async getHistory(req) {
         if (req.user.role !== 'manager' && req.user.role !== 'hall_admin') {
-            throw new common_1.UnauthorizedException('Access Denied');
+            throw new common_1.UnauthorizedException('Access Denied: Only Managers Allowed');
         }
-        return this.transactionsService.getTransactionHistory();
+        return this.transactionsService.getTransactionHistory(req.user.hallName);
+    }
+    async getPending(req) {
+        if (req.user.role !== 'manager' && req.user.role !== 'hall_admin') {
+            throw new common_1.UnauthorizedException('Access Denied: Only Managers Allowed');
+        }
+        return this.transactionsService.getPendingTransactions(req.user.hallName);
     }
 };
 exports.TransactionsController = TransactionsController;
@@ -59,12 +62,12 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], TransactionsController.prototype, "createOrder", null);
 __decorate([
-    (0, common_1.Get)('pending'),
+    (0, common_1.Get)('my-history'),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
-], TransactionsController.prototype, "getPending", null);
+], TransactionsController.prototype, "getMyHistory", null);
 __decorate([
     (0, common_1.Post)('approve/:id'),
     __param(0, (0, common_1.Request)()),
@@ -88,6 +91,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], TransactionsController.prototype, "getHistory", null);
+__decorate([
+    (0, common_1.Get)('pending'),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], TransactionsController.prototype, "getPending", null);
 exports.TransactionsController = TransactionsController = __decorate([
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
     (0, common_1.Controller)('transactions'),

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException,ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { DiningToken, DiningTokenDocument } from './schemas/dining-token.schema';
@@ -57,66 +57,61 @@ async issueTokens(userId: string, days: number, transactionId: string) {
 
 
 
- async scanToken(tokenID: string, diningBoyId: string) {
-    const token = await this.diningTokenModel.findOne({ tokenID });
-    if (!token) throw new NotFoundException('Invalid Token! QR Code not match.');
-
-    const now = new Date();
-    const tokenDate = new Date(token.date);
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    tokenDate.setHours(0,0,0,0);
-
+  
+async scanToken(tokenID: string, scannerId: string, scannerRole: string, scannerHall: string) {
     
+    const token = await this.diningTokenModel.findOne({ tokenID: tokenID })
+        .populate('ownerId', 'hallName name email') 
+        .exec();
+
+    if (!token) {
+        throw new NotFoundException('Invalid Token ID');
+    }
+
+    const tokenOwner = token.ownerId as any; 
+    const tokenHallName = tokenOwner?.hallName;
+
+    if (!tokenHallName || tokenHallName.trim() !== scannerHall.trim()) {
+        throw new ForbiddenException(
+            `🚫 RESTRICTED: This token is for ${tokenHallName || 'Unknown Hall'}. It cannot be scanned in ${scannerHall}.`
+        );
+    }
+
     if (token.status === 'Used') {
-      throw new ConflictException('WARNING: Token ALREADY USED!');
+        throw new ConflictException('⚠️ Token already USED!');
     }
+
     if (token.status === 'Expired') {
-      throw new BadRequestException('Token is EXPIRED!');
+        throw new BadRequestException('❌ Token EXPIRED!');
     }
 
-
+    const today = new Date();
+    const tokenDate = new Date(token.date);
     
-    if (tokenDate < today) {
-        throw new BadRequestException('Token Date is past! EXPIRED.');
+    const todayStr = today.toDateString();
+    const tokenDateStr = tokenDate.toDateString();
+
+    if (todayStr !== tokenDateStr) {
+        throw new BadRequestException(`❌ Invalid Date! This token is for ${tokenDateStr}, today is ${todayStr}.`);
     }
-    
-    if (tokenDate > today) {
-        throw new BadRequestException(`Not Active Yet! Valid for ${tokenDate.toDateString()}.`);
-    }
-
-    const currentHour = now.getHours();
-    let isValidTime = false;
-
-    if (token.mealType === 'Lunch') {
-        if (currentHour >= 13 && currentHour < 15) {
-            isValidTime = true;
-        } else {
-            throw new BadRequestException('Lunch meal time (1PM - 3PM) is over or not started!');
-        }
-    } 
-    else if (token.mealType === 'Dinner') {
-        if (currentHour >= 21 && currentHour < 23) {
-            isValidTime = true;
-        } else {
-            throw new BadRequestException('Dinner meal time (9PM - 11PM) is over or not started!');
-        }
-    }
-
-
-    if (isValidTime) {
-        token.status = 'Used';
-        token.scannedAt = new Date();
-        token.scannedBy = new Types.ObjectId(diningBoyId);
-        await token.save();
-    
-        return { success: true, message: 'Token Verified! Serve Food ✅', meal: token.mealType };
-    }
-
-    throw new BadRequestException('Token validation failed for unknown reason.'); 
-  }
 
   
+    token.status = 'Used';
+    token.scannedBy = new Types.ObjectId(scannerId); 
+    token.scannedAt = new Date();
+    
+    await token.save();
+
+    return {
+        success: true,
+        message: 'Token Verified! Serve Food ✅',
+        meal: token.mealType,
+        studentName: tokenOwner?.name
+    };
+  }
+
+
+
   async getMyTokenStatus(userId: string) {
     const today = new Date();
     
@@ -192,6 +187,8 @@ async issueTokens(userId: string, days: number, transactionId: string) {
     return tokens;
   }
 
+
+
   //user token history
   async getTokenHistory(userId: string) {
     const todayStart = new Date();
@@ -233,6 +230,8 @@ async issueTokens(userId: string, days: number, transactionId: string) {
     .exec();
   }
 
+
+
   //history of dining boy scans
   async getDiningBoyScanHistory(userId: string) {
     const todayStart = new Date();
@@ -241,7 +240,6 @@ async issueTokens(userId: string, days: number, transactionId: string) {
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
 
-    // 1. Fetch recent scans
     const history = await this.diningTokenModel.find({
       scannedBy: new Types.ObjectId(userId), 
       scannedAt: { $gte: todayStart, $lte: todayEnd } 
@@ -256,6 +254,154 @@ async issueTokens(userId: string, days: number, transactionId: string) {
     });
 
     return { history, count };
+  }
+
+
+
+//for manager free access tokens
+async grantManagerFreeAccess(userId: string) {
+    const today = new Date();
+    
+    const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    
+    const oneDay = 24 * 60 * 60 * 1000;
+    const diffDays = Math.round(Math.abs((lastDayOfMonth.getTime() - today.getTime()) / oneDay));
+
+    
+    const daysToIssue = diffDays > 0 ? diffDays : 1;
+
+    return this.issueTokens(userId, daysToIssue, 'FREE_MANAGER_PERK');
+}
+
+//token revoke for demoted manager
+async revokeManagerAccess(userId: string) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    console.log(`Revoking access for: ${userId}, Deleting tokens from: ${tomorrow}`);
+
+    const result = await this.diningTokenModel.deleteMany({
+        ownerId: new Types.ObjectId(userId),
+        date: { $gte: tomorrow } 
+    }).exec();
+
+    console.log(`Deleted ${result.deletedCount} tokens for demoted manager: ${userId}`);
+    return result;
+}
+
+
+
+
+
+
+
+
+  //Use only emergency situations
+async handleEmergencyExtension(startDateStr: string, endDateStr: string, reason: string, adminId: string) {
+    const closureStartDate = new Date(startDateStr);
+    const closureEndDate = new Date(endDateStr);
+
+    // counting days
+    const diffInMilliseconds = closureEndDate.getTime() - closureStartDate.getTime();
+    const daysToShift = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24)) + 1;
+
+    if (daysToShift <= 0) {
+      throw new BadRequestException('Invalid date range for closure extension.');
+    }
+
+    const hallReopenDate = new Date(closureEndDate);
+    hallReopenDate.setDate(closureEndDate.getDate() + 1);
+    hallReopenDate.setHours(0, 0, 0, 0);
+
+
+    const affectedTokens = await this.diningTokenModel.find({
+      status: { $in: ['Active', 'Expired'] },
+      date: {
+        $gte: closureStartDate,
+        $lte: closureEndDate,
+      },
+    })
+    .sort({ ownerId: 1, date: 1, mealType: 1 }) 
+    .exec();
+
+    if (affectedTokens.length === 0) {
+        return {
+            success: true,
+            message: 'No unused tokens found within the closure period to extend.',
+            shiftedCount: 0,
+            closureDays: daysToShift,
+        };
+    }
+    
+    //grouping by user
+    const tokensByUser = affectedTokens.reduce((acc, token) => {
+        const ownerId = token.ownerId.toString();
+        if (!acc[ownerId]) {
+            acc[ownerId] = [];
+        }
+        acc[ownerId].push(token);
+        return acc;
+    }, {});
+
+    let totalShiftedCount = 0;
+
+    // loop for every user
+    for (const ownerId of Object.keys(tokensByUser)) {
+        const tokensToShift = tokensByUser[ownerId];
+        
+        // finding latest existing token date for the user
+        const latestExistingToken = await this.diningTokenModel.findOne({
+            ownerId: new Types.ObjectId(ownerId),
+            status: 'Active',
+        })
+        .sort({ date: -1 }) 
+        .exec();
+
+        let currentShiftDate = new Date(hallReopenDate); 
+
+        if (latestExistingToken) {
+            currentShiftDate = new Date(latestExistingToken.date);
+            currentShiftDate.setDate(currentShiftDate.getDate() + 1);
+        }
+        
+        currentShiftDate.setHours(0, 0, 0, 0); 
+
+        const mealsPerDay = 2; 
+        
+        for (let i = 0; i < tokensToShift.length; i++) {
+            const token = tokensToShift[i];
+            
+            const daysToAdd = Math.floor(i / mealsPerDay); 
+            
+            let finalNewDate = new Date(currentShiftDate); 
+            finalNewDate.setDate(currentShiftDate.getDate() + daysToAdd);
+            finalNewDate.setHours(0, 0, 0, 0); 
+            
+            await this.diningTokenModel.updateOne(
+                { _id: token._id },
+                {
+                    $set: { 
+                        date: finalNewDate,
+                        status: 'Active', 
+                        extendedReason: reason, 
+                        extendedBy: new Types.ObjectId(adminId),
+                        extendedOn: new Date(),
+                    }
+                }
+            ).exec();
+            
+            totalShiftedCount++;
+        }
+    }
+
+    return {
+      success: true,
+      message: `${totalShiftedCount} unused tokens have been dynamically re-activated and shifted.`,
+      shiftedCount: totalShiftedCount,
+      closureDays: daysToShift,
+    };
   }
   
   

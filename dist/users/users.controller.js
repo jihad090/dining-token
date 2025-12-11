@@ -11,17 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
@@ -44,13 +33,14 @@ let UsersController = class UsersController {
         return this.usersService.findById(req.user.sub);
     }
     async findStudent(req, email) {
-        if (req.user.role !== 'hall_admin')
+        if (req.user.role !== 'hall_admin') {
             throw new common_1.UnauthorizedException();
-        const user = await this.usersService.findOne(email);
-        if (!user)
-            throw new common_1.NotFoundException('Student not found');
-        const _a = user.toObject(), { password } = _a, result = __rest(_a, ["password"]);
-        return result;
+        }
+        const user = await this.usersService.findStudentInHall(email, req.user.hallName);
+        if (!user) {
+            throw new common_1.NotFoundException('Student not found in your hall');
+        }
+        return user;
     }
     async promoteStudent(req, body) {
         if (req.user.role !== 'hall_admin')
@@ -63,7 +53,11 @@ let UsersController = class UsersController {
         return this.usersService.changeUserRole(body.email, 'user', req.user.hallName);
     }
     async getMyManagers(req) {
-        return this.usersService.findUsersByHallAndRole(req.user.hallName, 'manager');
+        const admin = await this.usersService.findById(req.user.sub);
+        if (!admin || !admin.hallName) {
+            throw new common_1.NotFoundException("Hall information not found for this admin");
+        }
+        return this.usersService.findUsersByHallAndRole(admin.hallName, 'manager');
     }
     async addDiningBoy(req, body) {
         if (req.user.role !== 'manager') {
@@ -92,6 +86,7 @@ let UsersController = class UsersController {
 exports.UsersController = UsersController;
 __decorate([
     (0, common_1.Post)('submit-profile'),
+    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -100,6 +95,7 @@ __decorate([
 ], UsersController.prototype, "submitProfile", null);
 __decorate([
     (0, common_1.Post)('profile'),
+    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -114,6 +110,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findStudent", null);
 __decorate([
+    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
     (0, common_1.Post)('promote-student'),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
