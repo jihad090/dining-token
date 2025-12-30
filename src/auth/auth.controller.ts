@@ -40,7 +40,9 @@ return this.usersService.findById(req.user.sub);
   async googleAuthRedirect(@Req() req, @Res() res) {
     const { access_token } = req.user;
 const frontendUrl = this.configService.get<string>('FRONTEND_REDIRECT_HOST');
-return  res.redirect(`${frontendUrl}/--/google-auth-callback?token=${access_token}`);
+// return  res.redirect(`${frontendUrl}/--/google-auth-callback?token=${access_token}`);//for manually ip address
+return res.redirect(`${frontendUrl}google-auth-callback?token=${access_token}`);//for live server
+
   }
 
 
