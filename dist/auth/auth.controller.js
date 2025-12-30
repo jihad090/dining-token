@@ -40,7 +40,7 @@ let AuthController = class AuthController {
     async googleAuthRedirect(req, res) {
         const { access_token } = req.user;
         const frontendUrl = this.configService.get('FRONTEND_REDIRECT_HOST');
-        return res.redirect(`${frontendUrl}/--/google-auth-callback?token=${access_token}`);
+        return res.redirect(`${frontendUrl}google-auth-callback?token=${access_token}`);
     }
     async seedAdmin() {
         const existingAdmin = await this.usersService.findOne('provost@cuet.ac.bd');
