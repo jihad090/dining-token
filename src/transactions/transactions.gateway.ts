@@ -10,8 +10,11 @@ import { Server, Socket } from 'socket.io';
 //main geteway for real tiem notifications
 @WebSocketGateway({
   cors: {
-    origin: '*', 
+    origin: '*', //access from anywhere
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: false
   },
+  transports: ['websocket', 'polling'],
 })
 export class TransactionsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
