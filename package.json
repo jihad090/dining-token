@@ -1,7 +1,6 @@
 {
   "name": "dining-token",
   "main": "expo-router/entry",
-
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
@@ -48,7 +47,7 @@
     "react-native-screens": "~4.16.0",
     "react-native-web": "~0.21.0",
     "react-native-worklets": "0.5.1",
-    "socket.io-client": "^4.8.1"
+    "socket.io-client": "^4.8.3"
   },
   "devDependencies": {
     "@types/react": "~19.1.0",

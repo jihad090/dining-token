@@ -31,6 +31,8 @@ const [localHallName, setLocalHallName] = useState('My Hall');
   const fetchStatus = async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
+       const storedHall = await AsyncStorage.getItem('hallName'); 
+      if(storedHall) setLocalHallName(storedHall);
       const response = await fetch(`${API_BASE_URL}/dining-token/my-status`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
