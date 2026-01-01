@@ -2,11 +2,14 @@ import { Controller, Post, Body, UseGuards, Request, UnauthorizedException, Get 
 import { UsersService } from './users.service';
 import { AuthGuard } from '../auth/auth.guard'; 
 import * as bcrypt from 'bcrypt';
+import { DiningTokenService } from 'src/dining-token/dining-token.service';
 
 @UseGuards(AuthGuard) 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService,
+  private readonly diningTokenService: DiningTokenService
+  ) {}
 
   @Post('submit-profile')
   @UseGuards(AuthGuard) 
@@ -64,11 +67,17 @@ export class UsersController {
   async demoteManager(@Request() req, @Body() body: { email: string }) {
     if (req.user.role !== 'hall_admin') throw new UnauthorizedException();
 
-    return this.usersService.changeUserRole(
+    const updatedUser = await this.usersService.changeUserRole(
         body.email, 
         'user', 
         req.user.hallName
     );
+    
+    return { 
+        success: true, 
+        message: 'Manager demoted and free tokens revoked.', 
+        user: updatedUser 
+    };
   }
 
 

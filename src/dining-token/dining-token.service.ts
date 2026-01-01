@@ -33,11 +33,10 @@ private getBDBoundaries() {
     return { startOfBdDay, endOfBdDay };
 }
 
-async issueTokens(userId: string, days: number, transactionId: string) {
-  const user = await this.userModel.findById(userId);
-    if (!user || !user.hallName) throw new BadRequestException('User Hall Name not found!');
+async issueTokens(userId: string, days: number, transactionId: string, hallName: string) {
+  
     
-    const fixedHallName = user.hallName;
+    const fixedHallName = hallName;
     const tokensToInsert = [];
     
     const today = new Date();
@@ -97,10 +96,11 @@ async scanToken(tokenID: string, scannerId: string, scannerRole: string, scanner
         throw new NotFoundException('Invalid Token ID');
     }
 
-    const tokenOwner = token.ownerId as any; 
-    const tokenHallName = tokenOwner?.hallName;
 
-    if (token.hallName !== scannerHall) {
+const currentScannerHall = scannerHall.trim();
+    const tokenHallName = token.hallName.trim();
+
+    if (tokenHallName !== currentScannerHall) {
         throw new ForbiddenException(
             `🚫 RESTRICTED: This token is for ${tokenHallName || 'Unknown Hall'}. It cannot be scanned in ${scannerHall}.`
         );
@@ -135,7 +135,7 @@ async scanToken(tokenID: string, scannerId: string, scannerRole: string, scanner
         success: true,
         message: 'Token Verified! Serve Food ✅',
         meal: token.mealType,
-        studentName: tokenOwner?.name
+       // studentName: tokenOwner?.name
     };
   }
   
@@ -477,7 +477,7 @@ const currentHour = this.getBDCurrentHour();
 
 
 //for manager free access tokens
-async grantManagerFreeAccess(userId: string) {
+async grantManagerFreeAccess(userId: string, hallName: string) {
     const today = new Date();
     
     const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
@@ -488,7 +488,7 @@ async grantManagerFreeAccess(userId: string) {
     
     const daysToIssue = diffDays > 0 ? diffDays : 1;
 
-    return this.issueTokens(userId, daysToIssue, 'FREE_MANAGER_PERK');
+    return this.issueTokens(userId, daysToIssue, 'FREE_MANAGER_PERK', hallName);
 }
 
 //token revoke for demoted manager

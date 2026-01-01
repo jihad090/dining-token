@@ -83,7 +83,7 @@ async changeUserRole(email: string, newRole: string, adminHallName: string) {
     const savedUser = await user.save();
 
     if (newRole === 'manager') {
-        await this.diningTokenService.grantManagerFreeAccess(savedUser._id.toString());
+        await this.diningTokenService.grantManagerFreeAccess(savedUser._id.toString() , adminHallName);
     }
 
     return savedUser;

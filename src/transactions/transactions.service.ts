@@ -74,12 +74,14 @@ export class TransactionsService {
        
        throw new ConflictException('Transaction already processed by another manager!');
     }
+    const user = transaction.userId as any;
 
     // Issue Tokens
     await this.diningTokenService.issueTokens(
         transaction.userId._id.toString(), 
         transaction.daysCount,
-        transaction._id.toString()
+        transaction._id.toString(),
+        user.hallName
     );
 
     // Notify User via WebSocket
