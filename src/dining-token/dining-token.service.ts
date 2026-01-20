@@ -534,12 +534,12 @@ async revokeManagerAccess(userId: string) {
     const receiverId = token.ownerId.toString() === senderId 
         ? token.requestedBy.toString() 
         : token.ownerId.toString();
-
+     
     this.transactionsGateway.notifyChatMessage(receiverId, {
         tokenId: token._id,
         message: newMessage
     });
-
+    
     return { success: true, message: 'Message sent', data: newMessage };
 }
 

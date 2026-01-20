@@ -31,6 +31,22 @@ export class AuthService {
     }
   }
 
+  async updateUserProfile(userId: string, hallName: string, student_id: string) {
+    
+    const updatedUser = await this.usersService.updateProfile(userId, {
+      hallName: hallName,
+      student_id: student_id,
+      status: 'new' 
+    });
+
+    if (!updatedUser) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    return this.generateToken(updatedUser);
+  }
+  
+
   async signIn(email: string, pass: string) {
     const user: any = await this.usersService.findOne(email);
 

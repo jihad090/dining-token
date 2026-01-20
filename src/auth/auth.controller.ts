@@ -1,7 +1,7 @@
 
 //This file is API of registration and sign in 
 
-import { Body, Controller, Post,UseGuards, Request, Get, Req,Res } from '@nestjs/common';
+import { Body, Controller, Post,UseGuards, Request, Get,Patch, Req,Res, BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from '../users/users.service';
@@ -18,6 +18,18 @@ export class AuthController {
   @Post('register')
   register(@Body() body: RegisterDto) {
     return this.authService.register(body);
+  }
+@UseGuards(AuthGuard('jwt')) 
+  @Patch('update-profile')
+  async updateProfile(@Request() req, @Body() updateData: { hallName: string; student_id: string }) {
+    const { hallName, student_id } = updateData;
+
+    if (!hallName || !student_id) {
+      throw new BadRequestException('Hall Name and Student ID are required');
+    }
+
+    // req.user.userId আসবে আপনার JWT Strategy থেকে
+    return this.authService.updateUserProfile(req.user.userId, hallName, student_id);
   }
 @Get('profile')
 @UseGuards(AuthGuard('jwt')) 
